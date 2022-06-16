@@ -5,13 +5,14 @@
 # Created Date: 2022-06-10
 # version ='1.0'
 # ---------------------------------------------------------------------------
-""" Script formatting the Raw data into correct format for MyLake"""
+""" Script formatting the Raw data into the correct format for MyLake"""
 # ---------------------------------------------------------------------------
 # Imports
 # ---------------------------------------------------------------------------
 
 import os
 import pandas as pd
+import csv
 
 # ---------------------------------------------------------------------------
 # Global Variables
@@ -41,6 +42,75 @@ all_variable_needed = ["Date", "Precipitation", "GlobalRadiation", "Relative hum
 # ---------------------------------------------------------------------------
 # Functions
 # ---------------------------------------------------------------------------
+
+def get_all_files_in_directory(directory: str):
+    """
+    a function that walks in the directory and gets all file names. Return a list of all the files in the directory.
+    :param directory:   directory path to the folder we want to get all the file names from.
+    :type directory:    str
+    :return:            list of all files (with the relative path to the directory) in the folder
+    """
+    final_list_of_all_files = []
+    if os.path.exists(directory):
+        print("Start walk into %s folder" % directory)
+        for (root, dirs, files) in os.walk(directory):
+            if files:
+                final_list_of_all_files.extend([os.path.join(root, file) for file in files])
+        print("End walk into %s folder" % directory)
+    else:
+        print("Folder given does not exist.")
+    return final_list_of_all_files
+
+
+def get_information_from_file_as_dataframe(file_path: str, skipuntil=None):
+    """
+    A function that opens the file and extracts the information
+    :param skipuntil:   if part of the script is not needed, the script will remove lines of the data until this string
+                        is found. the function will start to read data after that variable is found. If the variable is
+                        None, the function considers that the data start at the first line.
+    :type skipuntil:    str
+
+    :param file_path:   file path + complete file name.
+    :type file_path:    str
+
+    :return:            if raw data are in matrix format (for txt file), return a DataFrame of the columns (column name
+                        given if first data is a string, else used default number) and rows from the file.
+                        Return None if the file does not contain data in matrix format (more than one column),
+                        does not exist, or is empty.
+    """
+
+    if os.path.exists(file_path):
+        # if file is a csv or xlsx
+        if file_path.lower().endswith(('.xlsx', '.csv')):
+            if os.path.splitext(file_path)[1] == ".csv":
+                with open(file_path) as csvfile:
+                    sniffer = csv.Sniffer()
+                    dialect = sniffer.sniff(csvfile.read())
+
+                dataframe_of_the_file = pd.read_csv(file_path, sep=dialect.delimiter)
+                if skipuntil is not None:
+                    dataframe_of_the_file = \
+                        dataframe_of_the_file.iloc[
+                            (dataframe_of_the_file.loc[dataframe_of_the_file[0] ==
+                                                       skipuntil].index[0] + 1):, :].reset_index(drop=True)
+
+            else:
+                dataframe_of_the_file = pd.read_excel(file_path)
+            if dataframe_of_the_file.empty:
+                print("file given is empty")
+                return None
+            else:
+                return dataframe_of_the_file
+        elif file_path.lower().endswith('.txt'):
+            print()
+        else:
+            print("File format %s is not supported by this script" % os.path.splitext(file_path)[1])
+            return None
+
+    else:
+        print("File %s does not exist or the relative path is not in function of this script" % file_path)
+        return None
+
 
 def extract_bathymetry(lakes: dict, rawdata_path: str = raw_geo_data_directory,
                        rawnamefile: str = "area_export_corrected.csv", observation_path: str = observation_directory):

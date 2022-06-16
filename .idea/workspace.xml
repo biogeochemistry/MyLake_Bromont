@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="a05278e4-9abd-4f72-900d-ad53d129af6f" name="Default Changelist" comment="" />
+    <list default="true" id="a05278e4-9abd-4f72-900d-ad53d129af6f" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/OI/extract_information_from_raw_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/OI/extract_information_from_raw_data.py" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -13,12 +15,19 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/OI/extract_information_from_raw_data.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1003">
-              <caret line="88" lean-forward="true" selection-start-line="88" selection-end-line="88" />
+            <state relative-caret-position="426">
+              <caret line="155" column="8" selection-start-line="155" selection-start-column="8" selection-end-line="155" selection-end-column="8" />
               <folding>
                 <element signature="n#!!doc" />
-                <element signature="e#347#424#0" />
-                <element signature="e#4789#5732#1" />
+                <element signature="e#518#527#0" expanded="true" />
+                <element signature="e#3439#3522#0" />
+                <element signature="e#4151#4207#0" />
+                <element signature="e#4368#4480#0" />
+                <element signature="e#4500#4618#0" />
+                <element signature="e#2981#3838#0" />
+                <element signature="e#6672#6761#0" />
+                <element signature="e#6780#6832#0" />
+                <element signature="e#4174#4273#0" />
               </folding>
             </state>
           </provider>
@@ -46,16 +55,6 @@
       </list>
     </option>
   </component>
-  <component name="ProjectConfigurationFiles">
-    <option name="files">
-      <list>
-        <option value="$PROJECT_DIR$/.idea/MyLake_Bromont.iml" />
-        <option value="$PROJECT_DIR$/.idea/vcs.xml" />
-        <option value="$PROJECT_DIR$/.idea/misc.xml" />
-        <option value="$PROJECT_DIR$/.idea/modules.xml" />
-      </list>
-    </option>
-  </component>
   <component name="ProjectFrameBounds" extendedState="6">
     <option name="x" value="170" />
     <option name="y" value="215" />
@@ -78,6 +77,19 @@
               <item name="MyLake_Bromont" type="b2602c69:ProjectViewProjectNode" />
               <item name="MyLake_Bromont" type="462c0819:PsiDirectoryNode" />
               <item name="OI" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="MyLake_Bromont" type="b2602c69:ProjectViewProjectNode" />
+              <item name="MyLake_Bromont" type="462c0819:PsiDirectoryNode" />
+              <item name="OI" type="462c0819:PsiDirectoryNode" />
+              <item name="obs" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="MyLake_Bromont" type="b2602c69:ProjectViewProjectNode" />
+              <item name="MyLake_Bromont" type="462c0819:PsiDirectoryNode" />
+              <item name="OI" type="462c0819:PsiDirectoryNode" />
+              <item name="obs" type="462c0819:PsiDirectoryNode" />
+              <item name="Bromont" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="MyLake_Bromont" type="b2602c69:ProjectViewProjectNode" />
@@ -172,8 +184,8 @@
       <window_info anchor="bottom" id="Event Log" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.32956153" />
-      <window_info anchor="bottom" id="Debug" order="3" visible="true" weight="0.39886847" />
+      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.32956153" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.39886847" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -193,12 +205,19 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/OI/extract_information_from_raw_data.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1003">
-          <caret line="88" lean-forward="true" selection-start-line="88" selection-end-line="88" />
+        <state relative-caret-position="426">
+          <caret line="155" column="8" selection-start-line="155" selection-start-column="8" selection-end-line="155" selection-end-column="8" />
           <folding>
             <element signature="n#!!doc" />
-            <element signature="e#347#424#0" />
-            <element signature="e#4789#5732#1" />
+            <element signature="e#518#527#0" expanded="true" />
+            <element signature="e#3439#3522#0" />
+            <element signature="e#4151#4207#0" />
+            <element signature="e#4368#4480#0" />
+            <element signature="e#4500#4618#0" />
+            <element signature="e#2981#3838#0" />
+            <element signature="e#6672#6761#0" />
+            <element signature="e#6780#6832#0" />
+            <element signature="e#4174#4273#0" />
           </folding>
         </state>
       </provider>
