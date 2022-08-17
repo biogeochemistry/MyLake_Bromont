@@ -147,18 +147,15 @@ It was first done with the restriction of interpolating a maximum of 3 consecuti
 long period with constant values. The script after identified the days still without data and replace those values, 
 when available, with an average daily value calculated from the raw data. Finally, for the days that are still missing 
 (with days in a long period without data and never measure over the 5 years of data given), larger interpolation is 
-done to fill the gaps and ensure a completed dataset. Even if the dataset is not a perfect replication of reality, 
-the visualization of the formatted climate data seems to present a good representation of reality.
+done to fill the gaps and ensure a completed dataset.
 
 
-<!--- 
 ### Part 2 ###
 
 #### [**script\_manual\_calibratin.py**](script_manual_calibration.py)
 
-This script allows testing different values ​​for the selected parameters for a specific variable (Temperature, Oxygen, 
-or Chlorophyll a). At the moment I only wrote this script to calibrate the temperature in the water column of Lake Nedre.
- I will add the other options in the future.
+This script allows testing different values ​​for the selected parameters for a specific variable fpr the water column (Temperature or Oxygen)
+and for the sediments (). 
 
 When the main script is run, the user will be prompted for input to determine what is calibrated, which lake is
 calibrated, and what the backup options will be. Once these questions are answered, the main loop starts, and,
@@ -182,13 +179,13 @@ Note that because of incompatibility, this version cannot launch the Matlab sess
  It will be resolved, but for the moment it can verify if everything has been installed correctly or showcase the script.
 
 
-Example of figures generated (for Nedre, using the initial values
+Example of figures generated (for lac Bromont, using the initial values
 for parameters related to Temperature):
 
 ![The first digit generated. Give a comparison of modeled data to observations.](img/example_TOC_comparison_for_document.png)
 
 Figure 1. Observed vs simulated temperature (squares), oxygen (circles), and chlorophyll a (triangles) for all depths 
-(from red (0; surface) to blue (6; max depth)) of Lake Nedre. the fourth figure is a comparison of observations (squares)
+(from red (0; surface) to blue (7; max depth)) of Lake Bromont. the fourth figure is a comparison of observations (squares)
  and simulated (lines) of the calibrated variable (here, Temperature) for the surface (black) and deep water (blue).
 
 ![Second digit generated. Give a time series of the three variables and profiles of these variables for different dates.](img/example_timeseries_and_profils.png)
@@ -196,8 +193,4 @@ Figure 1. Observed vs simulated temperature (squares), oxygen (circles), and chl
 Figure 2. Comparison of observed (Square: Temperature, Circle: Oxygen, Triangle: Chlorophyll a) and simulated (lines) 
 values ​​for surface (black) and deep water (blue: Temperature, red: Oxygen, green: Chlorophyll a).
 The first three figures present this comparison over time, while the other six figures present the water profiles 
-(colored profiles: Observations, black profiles: Simulations) for spring, summer, and autumn withdrawals in 2019 and 2020.
-
-
-
---->
+(colored profiles: Observations, black profiles: Simulations) for spring, summer, and autumn withdrawals in 2020 and 2021.
