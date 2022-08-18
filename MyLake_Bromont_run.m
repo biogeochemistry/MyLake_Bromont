@@ -4,7 +4,7 @@
 % Code checked by TSA, xx.03.2005
 % Last modified by TSA, 15.08.2006 (Az replaced by In_Az 10.03.06; Possibility to have NaN in Global rad. series, 15.08.06)
 
-function []= MyLake_Bromont_run(M_start,M_stop,lake_name,kz_N0,c_shelter, i_scv, i_sct, swa_b0, swa_b1, I_scDOC,I_scO,I_scChl,k_Chl,k_POP,k_POC,k_DOP,k_DOC,k_pdesorb_a,k_pdesorb_b, enable_sediment,enable_river_inflow)
+function []= MyLake_Bromont_run(M_start,M_stop,lake_name,kz_N0,c_shelter, i_scv, i_sct, swa_b0, swa_b1, I_scDOC,I_scO,I_scChl,k_Chl,k_BOD,k_POP,k_POC,k_DOP,k_DOC,k_pdesorb_a,k_pdesorb_b, enable_sediment,enable_river_inflow)
 addpath(genpath("MyLake_v2_Vansjo"));
 % Inputs:
 %       M_start : Model start date [year, month, day]
@@ -72,6 +72,7 @@ lake_params{40} = swa_b1;   %1.05,        % 40    PAR light attenuation coeff. (
 lake_params{23} = I_scDOC;   %1,           % 23    scaling factor for inflow concentration of DOC  (-)
 lake_params{25} = I_scO;    %1,             % 23    scaling factor for inflow concentration of DOC  (-)
 lake_params{22} = I_scChl;   %1           % 22    scaling factor for inflow concentration of Chl a (-)
+lake_params{22} = k_BOD;     %0.1         % 62    NOTE: NOT USED: Organic decomposition rate (1/d)
 % =============== Sediment Parameters ====================================
 %sediment_params{52} = 65.1237e+000;   %    accel
 %lake_params{24} = 390.1162e-003;   % 24    scaling factor for inflow concentration of POP (-)
@@ -106,13 +107,13 @@ sediment_params{24} = k_pdesorb_b; %100         %
 % fclose(f);
 % 
 lake_par_file = sprintf('./IO/%s/%s_para.txt',lake_name,lake_name);
-% fid=fopen(lake_par_file,'wt');
-% fprintf(fid,'\n\n');
-% dlmwrite(lake_par_file, [[1:length(data_lake{1})]',lake_params,data_lake{3},data_lake{4},(1:length(data_lake{1}))'],'delimiter','\t','-append'); % 1:length(K_lake) is the length of the parameter file.
-% fclose(fid);
-% try
-export_params_lake(lake_params,'./IO/vansjo_para.txt', lake_par_file)
-[MyLake_results, Sediment_results]  = fn_MyL_application_Bromont(m_start, m_stop, sediment_params, lake_params, name_of_scenario, save_initial_conditions, sprintf('./Postproc_code/%s',lake_name),sprintf('./IO/%s/mylake_initial_concentrations.txt',lake_name),'./IO/vansjo_para.txt', enable_sediment,enable_river_inflow); % runs the model and outputs obs and sim % runs the model and outputs obs and sim
+if isfile(lake_par_file)
+    
+else
+    export_params_lake(lake_params,'./IO/vansjo_para.txt', lake_par_file)
+end
+
+[MyLake_results, Sediment_results]  = fn_MyL_application_Bromont(m_start, m_stop, sediment_params, lake_params, name_of_scenario, save_initial_conditions, sprintf('./Postproc_code/%s',lake_name),sprintf('./IO/%s/mylake_initial_concentrations.txt',lake_name),lake_par_file, enable_sediment,enable_river_inflow); % runs the model and outputs obs and sim % runs the model and outputs obs and sim
 
 
 disp('Saving results...')

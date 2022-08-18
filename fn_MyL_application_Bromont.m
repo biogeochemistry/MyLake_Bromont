@@ -33,6 +33,8 @@ fprintf(fid,'\n\n');
 new_param = K_lake(:,1);
 dlmwrite(lake_par_file, [[1:length(K_lake)]',cell2mat(new_param),data_lake{3},data_lake{4},(1:length(K_lake))'],'delimiter','\t','-append'); % 1:length(K_lake) is the length of the parameter file.
 fclose(fid);
+
+
 %% Specific MyLake application
 
 % warning('off', 'all')
@@ -40,7 +42,7 @@ fclose(fid);
 parafile=lake_par_file;
 inputfile=name_of_scenario;
 
-[MyLake_results, Sediment_results] ...
+[MyLake_results, Sediment_results,O2zt,Chlzt] ...
     = solvemodel_v2_Bromont(m_start,m_stop,initfile,'lake',inputfile,'timeseries', parafile,'lake',enable_sediment,enable_river_inflow);
 
 %MyLake_results = MyLake_results;
@@ -50,11 +52,12 @@ inputfile=name_of_scenario;
 % %f1_name = '\Tzt.csv';
 % dlmwrite(f1_name, Tzt(:, 366:end)', 'delimiter', ',', 'precision', '%.3f'); % depend on spin up year
 % O2zt = O2zt* 0.001;
-% f5_name = (strcat(output_file, '/O2zt.csv'));
-% dlmwrite(f5_name, O2zt(:, 366:end)', 'delimiter', ',', 'precision', '%.3f');
-% 
-% f5_name = (strcat(output_file, '/Chlzt.csv'));
-% dlmwrite(f5_name,Chlzt(:, 366:end)', 'delimiter', ',', 'precision', '%.3f');
+
+f5_name = (strcat( './Postproc_code/O2zt.csv'));
+dlmwrite(f5_name, O2zt(:, 366:end)', 'delimiter', ',', 'precision', '%.3f');
+
+f5_name = (strcat('./Postproc_code/Chlzt.csv'));
+dlmwrite(f5_name,Chlzt(:, 366:end)', 'delimiter', ',', 'precision', '%.3f');
 
 if is_save_results
     % disp('Saving sediment and water-column profiles for basin 1: Storefjorden');
