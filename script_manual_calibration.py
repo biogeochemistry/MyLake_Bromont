@@ -19,6 +19,17 @@ import warnings
 warnings.filterwarnings("ignore")
 register_matplotlib_converters()
 
+# import sys
+# import subprocess
+# import pkg_resources
+#
+# required = {'matplotlib','scipy','time','statsmodels','numpy','math','sklearn','statistics','csv','shutil','seaborn'}
+# installed = {pkg.key for pkg in pkg_resources.working_set}
+# missing = required - installed
+# if missing:
+#     python = sys.executable
+#     subprocess.check_call([python, '-m', 'pip', 'install', *missing], stdout=subprocess.DEVNULL)
+
 import matplotlib.pyplot as plt
 from scipy.stats import linregress
 import time
@@ -32,14 +43,15 @@ import statistics
 import csv
 import os
 import shutil
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import pandas as pd
 import seaborn as sns
 from numpy import arange, nan, reshape, sqrt
-from IPython import get_ipython
 import scipy.io as sio
 
-variable_pos = {'T': 5, 'O2': 6, 'Chl': 13}
+
+
+# variable_pos = {'T': 5, 'O2': 6, 'Chl': 13}
 num2month = {1: "Jan", 2: "Feb", 3: "Mar", 4: "Apr", 5: "May", 6: "June", 7: "July", 8: "Aug", 9: "Sept", 10: "Oct",
              11: "Nov", 12: "Dec"}
 variables_dict = {'T': "Temperature", 'O2': "DO concentration", 'Chl': 'Chlorophyll a'}
@@ -54,73 +66,8 @@ parameters = {"Swa_b0": [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5],
               "Alb_melt_ice": [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
               "Alb_melt_snow": [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]}
 
-# full_lake_list = "Allequash"
-regions = {"US": ["Allequash_Lake", "Annie", "Big_Muskellunge_Lake", "Black_Oak_Lake", "Crystal_Lake",
-                  "Crystal_Bog", "Delavan", "Falling_Creek_Reservoir", "Fish_Lake", "Great_Pond",
-                  "Green_Lake", "Laramie_Lake", "Mendota", "Monona", "Okauchee_Lake",
-                  "Sammamish", "Sparkling_Lake", "Sunapee", "Tahoe", "Toolik_Lake",
-                  "Trout_Lake", "Trout_Bog", "Two_Sisters_Lake", "Washington", "Wingra"],
-           "CH": ["Biel", "Lower_Zurich", "Neuchatel"],
-           "PT": ["Alqueva"],
-           "FR": ["Annecy", "Bourget", "Geneva"],
-           "AU": ["Argyle", "Burley_Griffin", "Mt_Bold"],
-           "CA": ["Dickie_Lake", "Eagle_Lake", "Harp_Lake"],
-           "SE": ["Ekoln_basin_of_Malaren", "Erken"],
-           "UK": ["Esthwaite_Water", "Windermere"],
-           "IE": ["Feeagh"],
-           "FI": ["Kilpisjarvi", "Kuivajarvi", "Paajarvi"],
-           "IL": ["Kinneret"],
-           "RW": ["Kivu"],
-           "CZ": ["Klicava", "Rimov", "Zlutice"],
-           "NO": ["Langtjern"],
-           "RU": ["Mozaisk", "Vendyurskoe"],
-           "DE": ["Mueggelsee", "Rappbode_Reservoir", "Stechlin"],
-           "CN": ["Ngoring"],
-           "EE": ["Nohipalo_Mustjarv", "Nohipalo_Valgejarv", "Vortsjarv"],
-           "ES": ["Sau_Reservoir"],
-           "NZ": ["Rotorua", "Tarawera", "Taupo", "Waahi"]}
 
-full_lake_list = ['Annie', 'Allequash_Lake', 'Alqueva', 'Annecy', 'Argyle',
-                  'Biel', 'Big_Muskellunge_Lake', 'Black_Oak_Lake', 'Bourget', 'Burley_Griffin',
-                  'Crystal_Bog', 'Crystal_Lake', 'Delavan', 'Dickie_Lake', 'Eagle_Lake',
-                  'Ekoln_basin_of_Malaren', 'Erken', 'Esthwaite_Water', 'Falling_Creek_Reservoir', 'Feeagh',
-                  'Fish_Lake', 'Geneva', 'Great_Pond', 'Green_Lake', 'Harp_Lake',
-                  'Kilpisjarvi', 'Kinneret', 'Kivu', 'Kuivajarvi', 'Langtjern',
-                  'Laramie_Lake', 'Lower_Zurich', 'Mendota', 'Monona', 'Mozaisk',
-                  'Mt_Bold', 'Mueggelsee', 'Neuchatel', 'Ngoring', 'Nohipalo_Mustjarv', 'Nohipalo_Valgejarv',
-                  'Okauchee_Lake', 'Paajarvi', 'Rappbode_Reservoir', 'Rimov', 'Rotorua',
-                  'Sammamish', 'Sau_Reservoir', 'Sparkling_Lake', 'Stechlin', 'Sunapee',
-                  'Tahoe', 'Tarawera', 'Toolik_Lake', 'Trout_Bog', 'Trout_Lake',
-                  'Two_Sisters_Lake', 'Vendyurskoe', 'Vortsjarv', 'Washington', 'Windermere',
-                  'Wingra']
-
-temp_by_lake = {'Annie': [1, 17], 'Allequash_Lake': [1, 6], 'Alqueva': [1, 60], 'Annecy': [10, 61],
-                "Argyle": [0.7, 26.7],
-                'Biel': [5, 70], 'Big_Muskellunge_Lake': [1, 18], 'Black_Oak_Lake': [0.9144, 24.384],
-                'Bourget': [9.5, 106], 'Burley_Griffin': [3, 12],
-                'Crystal_Bog': [0.5, 1.5], 'Crystal_Lake': [1, 17], 'Delavan': [1, 15], 'Dickie_Lake': [1, 9],
-                'Eagle_Lake': [1, 10],
-                'Ekoln_basin_of_Malaren': [1, 27.25], 'Erken': [0.5, 20], 'Esthwaite_Water': [0.5, 11.5],
-                'Falling_Creek_Reservoir': [1, 8], 'Feeagh': [0.9, 42],
-                'Fish_Lake': [1, 17], 'Geneva': [3.6, 263.6], 'Great_Pond': [1, 19], 'Green_Lake': [1, 66],
-                'Harp_Lake': [1, 27],
-                'Kilpisjarvi': [0.75, 31], 'Kinneret': [2, 34], 'Kivu': [0, 90], 'Kuivajarvi': [0.5, 8],
-                'Langtjern': [1, 8],
-                'Laramie_Lake': [0.8, 6], 'Lower_Zurich': [1, 100], 'Mendota': [0, 20], 'Monona': [1, 18],
-                'Mozaisk': [1, 7],
-                'Mt_Bold': [1, 34], 'Mueggelsee': [1, 5], 'Neuchatel': [0, 100], 'Ngoring': [4.5, 19.5],
-                'Nohipalo_Mustjarv': [0.5, 5],
-                'Nohipalo_Valgejarv': [0.5, 7], 'Okauchee_Lake': [1, 25], 'Paajarvi': [1, 60],
-                'Rappbode_Reservoir': [2.82, 52.62], 'Rimov': [0.2, 14.2],
-                'Rotorua': [2, 16], 'Sammamish': [1, 20], 'Sau_Reservoir': [2, 40], 'Sparkling_Lake': [0, 17],
-                'Stechlin': [0, 55],
-                'Sunapee': [1, 9], 'Tahoe': [1.5, 168.1], 'Tarawera': [2, 80], 'Toolik_Lake': [1, 16],
-                'Trout_Bog': [1, 7],
-                'Trout_Lake': [1, 29], 'Two_Sisters_Lake': [4.572, 15.24], 'Vendyurskoe': [4.58, 11.3],
-                'Vortsjarv': [0.5, 3], 'Washington': [1, 55],
-                'Windermere': [1, 35], 'Wingra': [1, 3]}
-
-variable_pos = {'T': 5, 'O2': 6, 'Chl': 13}
+variable_pos = {'T': 5, 'O2': 6}#, 'Chl': 13}
 
 
 ### Matlab files reading function ###
@@ -323,14 +270,14 @@ def ask_for_matlab_directory():
 
 def aks_for_which_lake_wanted_to_calibrated():
     """
-    function to get in input the lake that will be calibrated. For now, options are "Nedre" or "Ovre".
+    function to get in input the lake that will be calibrated. For now, options are "Bromont" .
     function is not case sensible.
-    :return: the lake name ("Nedre" or "Ovre")
+    :return: the lake name ("Bromont" )
     """
     while True:
-        lake_name = input("Enter which lake will be calibrated 'Nedre' or 'Ovre' (not case sensitive): ")
-        if lake_name.upper() not in ("NEDRE", "OVRE"):
-            print("Lake name giving is not an option, choose between 'Nedre' and 'Ovre'.\n")
+        lake_name = input("Enter which lake will be calibrated 'Bromont' (not case sensitive): ")
+        if lake_name.upper() not in ("BROMONT"):
+            print("Lake name giving is not an option, choose between 'Bromont'.\n")
             continue
         else:
             # user enter correct lake name
@@ -389,9 +336,9 @@ def aks_for_what_is_modeled():
 
 def ask_what_to_save():
     """
-    function to get in input the lake that will be calibrated. For now, options are "Nedre" or "Ovre".
+    function to get in input the lake that will be calibrated. For now, options are "Bromont" .
     function is not case sensible.
-    :return: the lake name ("Nedre" or "Ovre")
+    :return: the lake name ("Bromont" )
     """
     default = [True, True, False, False]
     while True:
@@ -478,6 +425,7 @@ def variables_by_depth(observation_folder, lakeName, output_folder, variable='T'
         depthlist = []
         loop = 0
         for depth in reader:
+            depth[3] = 7+ float(depth[3])
             if float(depth[3]) not in depthlist:
                 depthlist.append(float(depth[3]))
             elif float(depth[3]) == depthlist[0]:
@@ -486,13 +434,9 @@ def variables_by_depth(observation_folder, lakeName, output_folder, variable='T'
                 break
         outputdir2 = list(output_folder.split("/"))
         outputdir3 = 'Postproc_code'
-        for i in outputdir2:
-            if i == 'output':
-                outputdir3 = i
-            else:
-                if not os.path.exists(outputdir3):
-                    os.mkdir(outputdir3)
-                outputdir3 = os.path.join(outputdir3, i)
+        if not os.path.exists(outputdir3):
+            os.mkdir(outputdir3)
+        outputdir3 = os.path.join(outputdir3, lakeName)
         if not os.path.exists(outputdir3):
             os.mkdir(outputdir3)
 
@@ -716,6 +660,11 @@ def date_range(start, end):
     days_str = [int(day.strftime("%Y%m%d")) for day in days]
     return days_str
 
+def date_range_as_date(start, end):
+    delta = end - start  # as timedelta
+    days = [start + timedelta(days=i) for i in range(delta.days + 1)]
+    return days
+
 
 ### General Function related to Figures (Used by Class Graphic) ###
 def timeline_plot(modeleddata: list, modeleddates: list, observeddata: list = None, observeddates: list = None, ax=None,
@@ -852,7 +801,7 @@ class Lake:
     ----------
 
     lake_name : str
-        The name of the lake (For now, should be "Nedre" or "Ovre", error otherwise)
+        The name of the lake (For now, should be "Bromont" , error otherwise)
 
 
     Methods
@@ -866,7 +815,7 @@ class Lake:
         Parameters
         ----------
         lake_name : str
-            The name of the lake (For now, should be "Nedre" or "Ovre", error otherwise)
+            The name of the lake (For now, should be "Bromont" , error otherwise)
 
         observation_folder : str
             folder directory for where the formatted observations are.
@@ -886,36 +835,74 @@ class Lake:
         self.observation_folder = r"obs/%s" % lake_name
         self.save_date = datetime.now().strftime('%Y%m%d')
 
-        # Default value for parameters related to Temperature
-        self.kz_N0 = 0.00007
-        self.c_shelter = "NaN"
-        self.i_scv = 1
-        self.i_sct = 0
-        self.swa_b0 = 2.5
-        self.swa_b1 = 1
+        if not os.path.exists("IO/Bromont/Bromont_para.txt"):
+            # Default value for parameters related to Temperature
+            self.kz_N0 = 0.00007
+            self.c_shelter = "NaN"
+            self.i_scv = 1
+            self.i_sct = 0
+            self.swa_b0 = 2.5
+            self.swa_b1 = 1
 
-        # Default value for parameters related to Oxygen
-        self.I_scDOC = 1
-        self.I_scO = 1
+            # Default value for parameters related to Oxygen
+            self.I_scDOC = 1
+            self.I_scO = 1
+            self.k_BOD, = 0.1
 
-        # Default value for parameter related to Chl_a
-        self.I_scChl = 1
-        self.k_Chl = 0.4
+            # Default value for parameter related to Chl_a
+            self.I_scChl = 1
+            self.k_Chl = 0.4
 
-        # Default value for parameter related to sediment
-        self.k_POP =  0.04
-        self.k_POC =  0.02
-        self.k_DOP = 0.04
-        self.k_DOC = 0.02
-        self.k_pdesorb_a = 100
-        self.k_pdesorb_b = 100
+
+            # Default value for parameter related to sediment
+            self.k_POP =  0.04
+            self.k_POC =  0.02
+            self.k_DOP = 0.04
+            self.k_DOC = 0.02
+            self.k_pdesorb_a = 100
+            self.k_pdesorb_b = 100
+
+        else:
+            print("Since the script found the file '%s_Para', the value from the last calibration will be used")
+            par_file = pd.read_csv("IO/Bromont/Bromont_para.txt", sep='\t',skiprows=1)
+
+            par_file['Parameter'] = par_file['Parameter'].str.lower()
+            par_file = par_file.set_index('Parameter')
+
+
+
+            # Default value for parameters related to Temperature
+            self.kz_N0 = par_file.loc['kz_n0',"Value"]
+            self.c_shelter = par_file.loc['c_shelter',"Value"]
+            self.i_scv = par_file.loc['i_scv',"Value"]
+            self.i_sct = par_file.loc['i_sct',"Value"]
+            self.swa_b0 = par_file.loc['swa_b0',"Value"]
+            self.swa_b1 = par_file.loc['swa_b1',"Value"]
+
+            # Default value for parameters related to Oxygen
+            self.I_scDOC = par_file.loc['i_scdoc',"Value"]
+            self.I_scO = par_file.loc['i_sco',"Value"]
+            self.k_BOD = par_file.loc['k_bod', "Value"]
+
+            # Default value for parameter related to Chl_a
+            self.I_scChl = par_file.loc['i_scchl',"Value"]
+            self.k_Chl = 0.4
+
+
+            # Default value for parameter related to sediment
+            self.k_POP = 0.04
+            self.k_POC = 0.02
+            self.k_DOP = 0.04
+            self.k_DOC = 0.02
+            self.k_pdesorb_a = 100
+            self.k_pdesorb_b = 100
 
         self.input_folder = r"IO/%s" % lake_name
         self.output_folder = r"Postproc_code/%s" % lake_name
         self.figures_folder = r"Postproc_code/%s/figures" % lake_name
 
         # generate observed data
-        for variable in ["T", "O2", "Chl"]:
+        for variable in ["T", "O2"]:
             variables_by_depth(self.observation_folder, self.name, self.output_folder, variable)
 
     def manual_calibration_loop(self, report=True, save_figures=False, save_output_data=False,
@@ -958,7 +945,8 @@ class Lake:
             self.name, dict_variable[what_variable_is_calibrated], start_time.strftime('%Y%m%d_%H%M'))
             table_report = [
                 ["Iteration", "Lake", "Variable_calibrated", "kz_N0", "c_shelter", "i_scv", "i_sct", "swa_b0",
-                 "swa_b1", "I_scDOC", "RMSE_all", "R2_all", "RMSE", "NSE", "RSR", "Pbias", "R2",
+                 "swa_b1", "I_scDOC","I_scO","K_BOD","I_scChl","k_Chl","k_POP","k_POC","k_DOP","k_DOC","k_pdesorb_a",
+                 "k_pdesorb_b", "RMSE_all", "R2_all", "RMSE", "NSE", "RSR", "Pbias", "R2",
                  "SOS", "nrmse", "M_score", "Note", "time"]]
 
         iteration_number = 0
@@ -966,7 +954,8 @@ class Lake:
         while True:
             if iteration_number != 0:
                 while True:
-                    stop_iteration = input("Continue to test value for manual calibration (y or n)? ")
+
+                    stop_iteration = input("Continue to test value for manual calibration of %s(y or n)? "%dict_variable[what_variable_is_calibrated])
                     if stop_iteration.upper() not in ('Y', 'N'):
                         print("answer giving is not an option, choose between 'y' and 'n'.\n")
                         continue
@@ -984,11 +973,11 @@ class Lake:
                     return 0
 
                 print("\nStart MyLake run with kz_N0 = %s, c_shelter = %s, i_scv = %s, i_sct = %s, swa_b0 = %s, "
-                      "swa_b1 = %s, I_scDOC = %s, I_scO = %s, I_scChl  = %s, k_Chl = %s, k_POP = %s, k_POC = %s, "
+                      "swa_b1 = %s, I_scDOC = %s, I_scO = %s, I_scChl  = %s, k_Chl = %s, K_BOD = %s, k_POP = %s, k_POC = %s, "
                       "k_DOP = %s, k_DOC = %s, k_pdesorb_a = %s, k_pdesorb_b = %s" % (self.kz_N0, self.c_shelter,
                                                                                       self.i_scv, self.i_sct,
                                                                                       self.swa_b0, self.swa_b1,
-                                                                                      self.I_scDOC,self.I_scO, self.I_scChl ,self.k_Chl,
+                                                                                      self.I_scDOC,self.I_scO, self.I_scChl ,self.k_Chl,self.k_BOD,
                                                                                       self.k_POP, self.k_POC,
                                                                                       self.k_DOP, self.k_DOC,
                                                                                       self.k_pdesorb_a,
@@ -1004,23 +993,28 @@ class Lake:
                                 return 0
                         break
 
+                if self.name == "Bromont":
+                    enable_river_inflow = 1
+                else:
+                    enable_river_inflow = 1
                 # Run MyLake
                 if self.c_shelter == str(self.c_shelter):
-                    cmd = r'%s -wait -r -nosplash -nodesktop MyLake_Milsbo_run(%d,%d,%s,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,' \
-                          r'%f,%f,%f,%f,%f,%f,%d);quit' % ( '"%s"' % matlab, 2018, 2020, "'%s'" % self.name,
+                    cmd = r'%s -wait -r -nosplash -nodesktop MyLake_Bromont_run(%d,%d,%s,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,' \
+                          r'%f,%f,%f,%f,%f,%f,%d,%d);quit' % ( '"%s"' % matlab, 2018, 2021, "'%s'" % self.name,
                                                             self.kz_N0, "'%s'" % self.c_shelter, self.i_scv,
                                                             self.i_sct, self.swa_b0, self.swa_b1, self.I_scDOC,self.I_scO,
-                                                            self.I_scChl, self.k_Chl, self.k_POP, self.k_POC, self.k_DOP,
+                                                            self.I_scChl, self.k_Chl,self.k_BOD, self.k_POP, self.k_POC, self.k_DOP,
                                                             self.k_DOC, self.k_pdesorb_a, self.k_pdesorb_b,
-                                                            enable_sediment)
+                                                            enable_sediment,enable_river_inflow)
                 else:
-                    cmd = r'%s -wait -r -nosplash -nodesktop MyLake_Milsbo_run(%d,%d,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,' \
-                          r'%f,%f,%f,%f,%f,%f,%d);quit' % ('"%s"' % matlab, 2018, 2020, "'%s'" % self.name,
+                    cmd = r'%s -wait -r -nosplash -nodesktop MyLake_Bromont_run(%d,%d,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,' \
+                          r'%f,%f,%f,%f,%f,%f,%d,%d);quit' % ('"%s"' % matlab, 2018, 2021, "'%s'" % self.name,
                                                            self.kz_N0, self.c_shelter, self.i_scv, self.i_sct,
                                                            self.swa_b0, self.swa_b1, self.I_scDOC,self.I_scO,self.I_scChl, self.k_Chl,
-                                                           self.k_POP, self.k_POC, self.k_DOP, self.k_DOC,
-                                                           self.k_pdesorb_a, self.k_pdesorb_b, enable_sediment)
+                                                           self.k_BOD,self.k_POP, self.k_POC, self.k_DOP, self.k_DOC,
+                                                           self.k_pdesorb_a, self.k_pdesorb_b, enable_sediment,enable_river_inflow)
                 print("Run MyLake model with parameter\n" + cmd)
+                self.save_parameter_value()
                 try:
                     os.system(cmd)
                     print("run MyLake sucess")
@@ -1074,7 +1068,7 @@ class Lake:
                     Pbias = [[performances[0][0][3], performances[0][1][3]],
                              [performances[1][0][3], performances[1][1][3]],
                              [performances[2][0][3], performances[2][1][3]]]
-                    R2 = [[performances[0][0][4], performances[0][1][4]],
+                    R2 = [[performances[0][0][3], performances[0][1][4]],
                           [performances[1][0][4], performances[1][1][4]],
                           [performances[2][0][4], performances[2][1][4]]]
                     SOS = [[performances[0][0][5], performances[0][1][5]],
@@ -1085,7 +1079,7 @@ class Lake:
                              [performances[2][0][6], performances[2][1][6]]]
 
                     report_iteration_line = [iteration_number, self.name, what_variable_is_calibrated, self.kz_N0, self.c_shelter, self.i_scv, self.i_sct,
-                                                           self.swa_b0, self.swa_b1, self.I_scDOC,self.I_scO,self.I_scChl, self.k_Chl,
+                                                           self.swa_b0, self.swa_b1, self.I_scDOC,self.I_scO,self.k_BOD,self.I_scChl, self.k_Chl,
                                                            self.k_POP, self.k_POC, self.k_DOP, self.k_DOC,
                                                            self.k_pdesorb_a, self.k_pdesorb_b, RMSE_all, R2_all,
                                              RMSE, NSE, RSR, Pbias, R2, SOS, nrmse, M_score, Note,
@@ -1098,7 +1092,7 @@ class Lake:
 
         if report:
             df = pd.DataFrame(table_report[1:], columns=table_report[0])
-            df.to_csv(os.path.join(self.output_folder, report_core_title))
+            df.to_csv(os.path.join(self.output_folder, report_core_title),index=False)
         return 1
 
     def ask_parameters_value(self, what_is_calibrated, what_variable_is_calibrated):
@@ -1118,16 +1112,30 @@ class Lake:
                       "\n swa_b1 = %s" % (self.kz_N0, self.c_shelter, self.i_scv, self.i_sct, self.swa_b0, self.swa_b1))
             elif what_variable_is_calibrated == 2:
                 print("The parameters value are set to:"
+                      "\nTemperature parameters"
+                      "\n kz_N0 = %s"
+                      "\n c_shelter = %s"
+                      "\n i_scv = %s"
+                      "\n i_sct = %s"
+                      "\n swa_b0 = %s"
+                      "\n swa_b1 = %s" % (self.kz_N0, self.c_shelter, self.i_scv, self.i_sct, self.swa_b0, self.swa_b1))
+                print("The parameters value are set to:"
                       "\nOxygen parameters"
                       
                       "\n I_scDOC = %s"
-                      "\n I_scO = %s"% ( self.I_scDOC,self.I_scO))
+                      "\n I_scO = %s"
+                      "\n K_BOD = %s"
+                      "\nThe parameters value are set to:"
+                      "\nChlorophyl parameters"
+                      "\n I_scChl = %s"
+                      % ( self.I_scDOC,self.I_scO,self.k_BOD,self.I_scChl))
 
             elif what_is_calibrated == 3:
                 print("The parameters value are set to:"
                       "\nChlorophyl parameters"
                       "\n I_scChl = %s"
-                      "\n k_Chl = %s" % (self.k_Chl, self.I_scChl))
+                      "\n k_Chl = %s"
+                       % ( self.I_scChl,self.k_Chl))
 
             else:
                 print("The parameters value are set to:"
@@ -1142,10 +1150,11 @@ class Lake:
                       
                       "\n I_scDOC = %s"
                       "\n I_scO = %s"
+                      "\n K_BOD = %s" 
                       "\nChlorophyl parameters"
                       "\n I_scChl = %s"
-                      "\n k_Chl = %s" % (
-                      self.kz_N0, self.c_shelter, self.i_scv, self.i_sct, self.swa_b0, self.swa_b1, self.I_scDOC,self.I_scO,self.I_scChl, self.k_Chl))
+                      "\n k_Chl = %s"% (
+                      self.kz_N0, self.c_shelter, self.i_scv, self.i_sct, self.swa_b0, self.swa_b1, self.I_scDOC,self.I_scO,self.k_BOD,self.I_scChl, self.k_Chl))
                 #return 0
 
         elif what_is_calibrated == 2:
@@ -1173,9 +1182,11 @@ class Lake:
                  
                   "\n I_scDOC = %s"
                   "\n I_scO = %s"
+                  "\n K_BOD = %s"
                   "\nChlorophyl parameters"
                   "\n I_scChl = %s"
                   "\n k_Chl = %s"
+                  
                   "\nSediment parameters\n"
                   "\n k_POP = %s"
                   "\n k_POC = %s"
@@ -1184,7 +1195,7 @@ class Lake:
                   "\n k_pdesorb_a = %s"
                   "\n k_pdesorb_b = %s" % (
                   self.kz_N0, self.c_shelter, self.i_scv, self.i_sct, self.swa_b0, self.swa_b1,
-                  self.I_scDOC,self.I_scO,self.I_scChl, self.k_Chl, self.k_POP, self.k_POC, self.k_DOP, self.k_DOC, self.k_pdesorb_a,
+                  self.I_scDOC,self.I_scO,self.k_BOD,self.I_scChl, self.k_Chl, self.k_POP, self.k_POC, self.k_DOP, self.k_DOC, self.k_pdesorb_a,
                   self.k_pdesorb_b))
             # return 0
 
@@ -1314,6 +1325,120 @@ class Lake:
                         elif what_variable_is_calibrated == 2:
 
                             while True:
+                                change_parameters = input("\nChange kz_N0 (y or n or value)? ")
+                                if change_parameters.upper() not in ("N", "Y"):
+                                    try:
+                                        self.kz_N0 = float(change_parameters)
+                                        break
+                                    except:
+                                        print("Answer giving is not an option, choose between 'y', 'n' or a value.\n")
+                                        continue
+                                else:
+                                    if change_parameters.upper() == "Y":
+                                        while True:
+                                            parameter_value = input("Enter new kz_N0: ")
+                                            try:
+                                                self.kz_N0 = float(parameter_value)
+                                                break
+                                            except:
+                                                continue
+                                    break
+                            while True:
+                                change_parameters = input("\nChange c_shelter (y or n or value)? ")
+                                if change_parameters.upper() not in ("N", "Y"):
+                                    try:
+                                        self.c_shelter = float(change_parameters)
+                                        break
+                                    except:
+                                        print("Answer giving is not an option, choose between 'y', 'n' or a value.\n")
+                                        continue
+                                else:
+                                    if change_parameters.upper() == "Y":
+                                        while True:
+                                            parameter_value = input("Enter new c_shelter: ")
+                                            try:
+                                                self.c_shelter = float(parameter_value)
+                                                break
+                                            except:
+                                                continue
+                                    break
+                            while True:
+                                change_parameters = input("\nChange i_scv (y or n or value)? ")
+                                if change_parameters.upper() not in ("N", "Y"):
+                                    try:
+                                        self.i_scv = float(change_parameters)
+                                        break
+                                    except:
+                                        print("Answer giving is not an option, choose between 'y', 'n' or a value.\n")
+                                        continue
+                                else:
+                                    if change_parameters.upper() == "Y":
+                                        while True:
+                                            parameter_value = input("Enter new i_scv: ")
+                                            try:
+                                                self.i_scv = float(parameter_value)
+                                                break
+                                            except:
+                                                continue
+                                    break
+                            while True:
+                                change_parameters = input("\nChange i_sct (y or n or value)? ")
+                                if change_parameters.upper() not in ("N", "Y"):
+                                    try:
+                                        self.i_sct = float(change_parameters)
+                                        break
+                                    except:
+                                        print("Answer giving is not an option, choose between 'y', 'n' or a value.\n")
+                                        continue
+                                else:
+                                    if change_parameters.upper() == "Y":
+                                        while True:
+                                            parameter_value = input("Enter new i_sct: ")
+                                            try:
+                                                self.i_sct = float(parameter_value)
+                                                break
+                                            except:
+                                                continue
+                                    break
+                            while True:
+                                change_parameters = input("\nChange swa_b0 (y or n or value)? ")
+                                if change_parameters.upper() not in ("N", "Y"):
+                                    try:
+                                        self.swa_b0 = float(change_parameters)
+                                        break
+                                    except:
+                                        print("Answer giving is not an option, choose between 'y', 'n' or a value.\n")
+                                        continue
+                                else:
+                                    if change_parameters.upper() == "Y":
+                                        while True:
+                                            parameter_value = input("Enter new swa_b0: ")
+                                            try:
+                                                self.swa_b0 = float(parameter_value)
+                                                break
+                                            except:
+                                                continue
+                                    break
+                            while True:
+                                change_parameters = input("\nChange swa_b1 (y or n or value)? ")
+                                if change_parameters.upper() not in ("N", "Y"):
+                                    try:
+                                        self.swa_b1 = float(change_parameters)
+                                        break
+                                    except:
+                                        print("Answer giving is not an option, choose between 'y', 'n' or a value.\n")
+                                        continue
+                                else:
+                                    if change_parameters.upper() == "Y":
+                                        while True:
+                                            parameter_value = input("Enter new swa_b1: ")
+                                            try:
+                                                self.swa_b1 = float(parameter_value)
+                                                break
+                                            except:
+                                                continue
+                                    break
+                            while True:
                                 change_parameters = input("\nChange I_scDOC (y or n or value)? ")
                                 if change_parameters.upper() not in ("N", "Y"):
                                     try:
@@ -1353,6 +1478,46 @@ class Lake:
                                             except:
                                                 continue
                                     break
+                            while True:
+                                change_parameters = input("\nChange k_BOD (y or n or value)? ")
+                                if change_parameters.upper() not in ("N", "Y"):
+                                    try:
+                                        self.k_BOD = float(change_parameters)
+                                        break
+                                    except:
+                                        print("Answer giving is not an option, choose between 'y', 'n' or a value.\n")
+                                        continue
+                                else:
+                                    if change_parameters.upper() == "Y":
+                                        while True:
+                                            parameter_value = input("Enter new k_BOD: ")
+                                            try:
+                                                self.k_BOD = float(parameter_value)
+                                                break
+                                            except:
+                                                continue
+                                    break
+                            while True:
+                                change_parameters = input("\nChange I_scChl (y or n or value)? ")
+                                if change_parameters.upper() not in ("N", "Y"):
+                                    try:
+                                        self.I_scChl = float(change_parameters)
+                                        break
+                                    except:
+                                        print("Answer giving is not an option, choose between 'y', 'n' or a value.\n")
+                                        continue
+                                else:
+                                    if change_parameters.upper() == "Y":
+                                        while True:
+                                            parameter_value = input("Enter new I_scChl: ")
+                                            try:
+                                                self.I_scChl = float(parameter_value)
+                                                break
+                                            except:
+                                                continue
+                                    break
+
+
                         elif what_variable_is_calibrated == 3:
                             while True:
                                 change_parameters = input("\nChange I_scChl (y or n or value)? ")
@@ -1392,6 +1557,7 @@ class Lake:
                                             except:
                                                 continue
                                     break
+
 
                         else:
                             while True:
@@ -1549,6 +1715,25 @@ class Lake:
                                                 continue
                                     break
                             while True:
+                                change_parameters = input("\nChange k_BOD (y or n or value)? ")
+                                if change_parameters.upper() not in ("N", "Y"):
+                                    try:
+                                        self.k_BOD = float(change_parameters)
+                                        break
+                                    except:
+                                        print("Answer giving is not an option, choose between 'y', 'n' or a value.\n")
+                                        continue
+                                else:
+                                    if change_parameters.upper() == "Y":
+                                        while True:
+                                            parameter_value = input("Enter new k_BOD: ")
+                                            try:
+                                                self.k_BOD = float(parameter_value)
+                                                break
+                                            except:
+                                                continue
+                                    break
+                            while True:
                                 change_parameters = input("\nChange I_scChl (y or n or value)? ")
                                 if change_parameters.upper() not in ("N", "Y"):
                                     try:
@@ -1586,6 +1771,7 @@ class Lake:
                                             except:
                                                 continue
                                     break
+
 
 
                     elif what_is_calibrated == 2:
@@ -1916,7 +2102,25 @@ class Lake:
                                         except:
                                             continue
                                 break
-
+                        while True:
+                            change_parameters = input("\nChange k_BOD (y or n or value)? ")
+                            if change_parameters.upper() not in ("N", "Y"):
+                                try:
+                                    self.k_BOD = float(change_parameters)
+                                    break
+                                except:
+                                    print("Answer giving is not an option, choose between 'y', 'n' or a value.\n")
+                                    continue
+                            else:
+                                if change_parameters.upper() == "Y":
+                                    while True:
+                                        parameter_value = input("Enter new k_BOD: ")
+                                        try:
+                                            self.k_BOD = float(parameter_value)
+                                            break
+                                        except:
+                                            continue
+                                break
                         while True:
                             change_parameters = input("\nChange  k_POP (y or n or value)? ")
                             if change_parameters.upper() not in ("N", "Y"):
@@ -2054,7 +2258,7 @@ class Lake:
         # temp = water['T'][0, 0]
         # df = pd.DataFrame(temp).transpose()
 
-        if variable in ['T', "O2", "Chl"]:  # Mean water column comparison
+        if variable in ['T', "O2","Chl"]:  # Mean water column comparison
             with open("{}/{}_comparisonall.csv".format(self.output_folder, variable), "w", newline="\n") as file:
                 observation_dict = {}
                 simulation_dict = {}
@@ -2066,12 +2270,14 @@ class Lake:
                     for obs in reader[1:]:
                         observation_dict[int(obs[0].replace('-', ''))] = list(obs[1:])
 
-                sims_dates = date_range(datetime(2018, 1, 1), datetime(2021, 1, 1))
+
+                sims_dates = date_range(datetime(2018, 1, 1), datetime(2021, 12, 31))
+                sims_dates_datetime = date_range_as_date(datetime(2018, 1, 1), datetime(2021, 12, 31))
 
                 date_format = "%m/%d/%Y"
 
                 a = datetime.strptime('01/01/2018', date_format)
-                b = datetime.strptime('01/01/%s' % start_year_comparison, date_format)
+                b = datetime.strptime('01/01/%s' % 2019,date_format)#start_year_comparison, date_format)
                 number_skip_data = (b - a).days
 
                 if variable == "T":
@@ -2081,6 +2287,7 @@ class Lake:
                     data = water['concentrations'][0, 0][variable][0, 0]
                     data_from_mat = pd.DataFrame(data).transpose()
                     reader = data_from_mat.values.tolist()
+
 
                 for y in range(0, len(reader)):
                     temp_at_date = []
@@ -2107,10 +2314,8 @@ class Lake:
                                                          float(depth_levels[i]))
                                     # if valueyc < 0:
                                     #     print("here")
-                                    if variable == 'O2':
-                                        temp_at_date.append(valueyc*0.001)
-                                    else:
-                                        temp_at_date.append(valueyc)
+
+                                    temp_at_date.append(valueyc)
 
                                 else:
                                     temp_at_date.append(np.nan)
@@ -2120,12 +2325,14 @@ class Lake:
                                 if sim[depth1] == "None":
                                     temp_at_date.append("None")
                                 else:
-                                    if variable == "O2":
-                                        temp_at_date.append(float(sim[depth1])*0.001)
-                                    else:
-                                        temp_at_date.append(float(sim[depth1]))
+                                    temp_at_date.append(float(sim[depth1]))
 
-                    simulation_dict[sims_dates[y]] = temp_at_date
+                    try:
+                        date_sim = sims_dates[y]
+
+                    except:
+                        print("2")
+                    simulation_dict[date_sim] = temp_at_date
 
                 # with open("{}/{}zt.csv".format(self.output_folder, variable), "r") as simulation_file:
                 #     reader = list(csv.reader(simulation_file))
@@ -2135,55 +2342,61 @@ class Lake:
 
                 csvFile = csv.writer(file)
                 csvFile.writerow(
-                    ["Date", "Depth", "Observations", "Simulations"])
+                    ["Date", "Depth", "Observations", "Simulations","Datetime"])
 
-                for date in sims_dates[number_skip_data:]:
+                iii = 0
+                for date_i in range(0,len(sims_dates)):
+                    date = sims_dates[date_i]
 
-                    if self.output_folder == "D:\output\PT\Alqueva\EWEMBI\historical":
-                        date1 = date + 30000
-                    else:
-                        date1 = date
+                    datesimtime = sims_dates_datetime[date_i]
+                    test = simulation_dict[date]
+                    iii += 1
+
+                    date1 = date
 
                     if date1 in observation_dict.keys():
 
                         if 1 == 1:  # try:
                             for i in range(0, len(observation_dict[date1])):
-                                if str(observation_dict[date1][i])[0].isnumeric() and str(simulation_dict[date][i])[
-                                    0].isnumeric():
+                                if str(observation_dict[date1][i])[0].isnumeric() and (str(simulation_dict[date][i])[0].isnumeric()or str(simulation_dict[date][i])[0]=='-'):
+                                    if variable == 'O2':
+                                        datasim = simulation_dict[date][i] * 0.001
+                                    else:
+                                        datasim = simulation_dict[date][i]
                                     csvFile.writerow(
-                                        [date1, depth_levels[i], observation_dict[date1][i], simulation_dict[date][i]])
+                                        [date1, depth_levels[i], observation_dict[date1][i], datasim, datesimtime.strftime("%m/%d/%Y")])
 
                         # except KeyError:
                         #     continue
-                return None
 
-        if enable_sediment == 1:  # mean comparison sediment
-            with open("{}/{}_comparisonall.csv".format(self.output_folder, variable), "w", newline="\n") as file:
-                observation_dict = {}
-                simulation_dict = {}
-                depth_levels = []
-                col1, col2 = False, False
-                with open("{}/Observed_{}.csv".format(self.observation_folder, variable), "r") as observation_file:
-                    reader = list(csv.reader(observation_file))
-                    depth_levels = reader[0][1:]
-                    for obs in reader[1:]:
-                        observation_dict[int(obs[0].replace('-', ''))] = list(obs[1:])
+        if enable_sediment == 1:
+            if variable in ['T', "O2", "Chl"]:  # Mean sediment column comparison
+                with open("{}/{}_comparisonall.csv".format(self.output_folder, variable), "w", newline="\n") as file:
+                    observation_dict = {}
+                    simulation_dict = {}
+                    depth_levels = []
+                    col1, col2 = False, False
+                    with open("{}/Observed_{}.csv".format(self.observation_folder, variable), "r") as observation_file:
+                        reader = list(csv.reader(observation_file))
+                        depth_levels = reader[0][1:]
+                        for obs in reader[1:]:
+                            observation_dict[int(obs[0].replace('-', ''))] = list(obs[1:])
 
-                start_year = 2019
-                end_year = 2021
+                    sims_dates = date_range(datetime(2018, 1, 1), datetime(2021, 12, 31))
 
-                start_date = datetime(2019, 1, 1)
-                end_date = datetime(2021, 1, 1)
+                    date_format = "%m/%d/%Y"
 
-                sims_dates = date_range(start_date, end_date)
+                    a = datetime.strptime('01/01/2018', date_format)
+                    b = datetime.strptime('01/01/%s' % start_year_comparison, date_format)
+                    number_skip_data = (b - a).days
 
-                date_format = "%m/%d/%Y"
-
-                a = datetime.strptime('01/01/2019', date_format)
-                b = datetime.strptime('01/01/%s' % start_year, date_format)
-                number_skip_data = (b - a).days
-                with open("{}/{}zt.csv".format(self.output_folder, variable), "r") as simulation_file:
-                    reader = list(csv.reader(simulation_file))
+                    if variable == "T":
+                        data_from_mat = pd.DataFrame(water['T'][0, 0]).transpose()
+                        reader = data_from_mat.values.tolist()
+                    else:
+                        data = water['concentrations'][0, 0][variable][0, 0]
+                        data_from_mat = pd.DataFrame(data).transpose()
+                        reader = data_from_mat.values.tolist()
 
                     for y in range(0, len(reader)):
                         temp_at_date = []
@@ -2210,49 +2423,55 @@ class Lake:
                                                              float(depth_levels[i]))
                                         # if valueyc < 0:
                                         #     print("here")
-                                        if variable == 'O2':
-                                            temp_at_date.append(valueyc*0.001)
-                                        else:
-                                            temp_at_date.append(valueyc)
+                                        temp_at_date.append(valueyc)
 
                                     else:
                                         temp_at_date.append(np.nan)
 
                                 else:
                                     depth1 = int(float(depth_levels[i]) * (1 / dt))
-                                    if variable == 'O2':
-                                        temp_at_date.append(float(sim[depth1])*0.001)
+                                    if sim[depth1] == "None":
+                                        temp_at_date.append("None")
                                     else:
                                         temp_at_date.append(float(sim[depth1]))
 
-                        simulation_dict[sims_dates[y]] = temp_at_date
+                        try:
+                            date_sim = sims_dates[y]
+                        except:
+                            print("2")
+                        simulation_dict[date_sim] = temp_at_date
 
-                y = 0
+                    # with open("{}/{}zt.csv".format(self.output_folder, variable), "r") as simulation_file:
+                    #     reader = list(csv.reader(simulation_file))
+                    #
 
-                csvFile = csv.writer(file)
-                csvFile.writerow(
-                    ["Date", "Depth", "Observations", "Simulations"])
+                    y = 0
 
-                for date in sims_dates[number_skip_data:]:
+                    csvFile = csv.writer(file)
+                    csvFile.writerow(
+                        ["Date", "Depth", "Observations", "Simulations"])
 
-                    if self.output_folder == "D:\output\PT\Alqueva\EWEMBI\historical":
-                        date1 = date + 30000
-                    else:
+                    for date in sims_dates[:]:
+
                         date1 = date
 
-                    if date1 in observation_dict.keys():
+                        if date1 in observation_dict.keys():
 
-                        if 1 == 1:  # try:
-                            for i in range(0, len(observation_dict[date1])):
+                            if 1 == 1:  # try:
+                                for i in range(0, len(observation_dict[date1])):
+                                    if str(observation_dict[date1][i])[0].isnumeric() and str(simulation_dict[date][i])[
+                                        0].isnumeric():
+                                        if variable == 'O2':
+                                            datasim = simulation_dict[date][i] * 0.001
+                                        else:
+                                            datasim = simulation_dict[date][i]
+                                        csvFile.writerow(
+                                            [date1, depth_levels[i], observation_dict[date1][i], datasim])
 
-                                if str(observation_dict[date1][i])[0].isnumeric() and str(simulation_dict[date][i])[
-                                    0].isnumeric():
-                                    csvFile.writerow(
-                                        [date1, depth_levels[i], observation_dict[date1][i], simulation_dict[date][i]])
+                            # except KeyError:
+                            #     continue
+        return None
 
-                        # except KeyError:
-                        #     continue
-                return None
 
     def stats_lake(self, Observation, Modelisation):
         final_stat = ["RMSE", "NSE", "RSR", "Pbias", "R2", "SOS", "nrmse"]
@@ -2268,6 +2487,99 @@ class Lake:
         final_stat[5] = round(sums_of_squares(Observation, Modelisation), 3)
 
         return final_stat
+
+    def save_parameter_value(self):
+        """
+        Creates the MyLake parameter file. If the file LAE_para_all1.txt is present, it will be used to prepare the
+        parameters. Otherwise, the string in this function using the parameter's value from the class will be used.
+        :return: None
+        """
+
+
+        out = '''-999	"Mylake parameters"			
+Parameter	Value	Min	Max	Unit	
+dz	0.5	0.5	2	m	
+Kz_ak	0.04424	NaN	NaN	(-)	
+Kz_ak_ice	0.000898	NaN	NaN	(-)	
+Kz_N0	%s	NaN	NaN	s-2	
+C_shelter	%s	NaN	NaN	(-)	
+latitude	59.4	NaN	NaN	dec.deg	
+longitude	10.8	NaN	NaN	dec.deg	
+alb_melt_ice	0.3	NaN	NaN	(-)	
+alb_melt_snow	0.77	NaN	NaN	(-)	
+PAR_sat	1.447e-05	1.00E-05	1.00E-04	molm-2	
+f_par	0.45	NaN	NaN	(-)	
+beta_chl	0.037956	0.005	0.045	m2mg-1	
+lambda_I	5	NaN	NaN	m-1	
+lambda_s	15	NaN	NaN	m-1	
+sed_sld	0.36	NaN	NaN	(m3/m3)	
+I_scV	%s	NaN	NaN	(-)	
+I_scT	%s	NaN	NaN	degC	
+I_scC	1	NaN	NaN	(-)	
+I_scS	1	1.1	1.9	(-)	
+I_scTP	1	0.4	0.8	(-)	
+I_scDOP	1	NaN	NaN	(-)	
+I_scChl	%s	NaN	NaN	(-)	
+I_scDOC	%s	NaN	NaN	(-)	
+I_scPOC	1	NaN	NaN	(-)	
+I_scO	%s	NaN	NaN	(-)	
+I_scDIC	1	NaN	NaN	(-)	
+I_scNO3	0.75	NaN	NaN	(-)	
+I_scNH4	1	NaN	NaN	(-)	
+I_scSO4	1	NaN	NaN	(-)	
+I_scFe2	1	NaN	NaN	(-)	
+I_scCa2	1	NaN	NaN	(-)	
+I_scpH	1	NaN	NaN	(-)	
+I_scCH4	1	NaN	NaN	(-)	
+I_scFe3	5	NaN	NaN	(-)	
+I_scAl3	1	NaN	NaN	(-)	
+I_scSiO4	1	NaN	NaN	(-)	
+I_scSiO2	1	NaN	NaN	(-)	
+I_scdiatom	1	NaN	NaN	(-)	
+swa_b0	%s	NaN	NaN	m-1	
+swa_b1	%s	0.8	1.3	m-1	
+S_res_epi	3.3e-07	7.30E-08	1.82E-06	md-1	
+S_res_hypo	3.3e-08	NaN	NaN	md-1	
+H_sed	0.03	NaN	NaN	m	
+Psat_Lang	15	NaN	NaN	mgm-3	
+Fmax_Lang	30	5000	10000	mgkg-1	
+Uz_Sz	0.05	0.1	1	md-1	
+Uz_Chl	0.07	0.05	0.5	md-1	
+Y_cp	1	NaN	NaN	(-)	
+m_twty	0.12829	0.1	0.3	d-1	
+g_twty	1.4988	1	1.5	d-1	
+k_sed_twty	0.0002	NaN	NaN	d-1	
+k_dop_twty	0	NaN	NaN	d-1	
+P_half	1.6945	0.2	2	mgm-3	
+PAR_sat2	3.0583e-05	NaN	NaN	molm-2	
+beta_chl2	0.034714	NaN	NaN	m2mg-1	
+Uz_Chl2	0.07	NaN	NaN	md-1	
+m_twty2	0.20161	NaN	NaN	d-1	
+g_twty2	1.2687	NaN	NaN	d-1	
+P_half2	1.6142	NaN	NaN	mgm-3	
+oc_DOC	0.01	NaN	NaN	m2mg-1	
+qy_DOC	0.1	NaN	NaN	mgmol-1	
+k_BOD	%s	NaN	NaN	d-1	
+k_SOD	5	NaN	NaN	mgm-2	
+theta_BOD	1.047	NaN	NaN	(-)	
+theta_BOD_ice	1.13	NaN	NaN	(-)	
+open_slot	1	NaN	NaN	(-)	
+open_slot	1	NaN	NaN	(-)	
+theta_T	4	NaN	NaN	deg.celcius	
+pH	7.5	NaN	NaN	(-)	
+Q10	2	NaN	NaN	(-)	
+wc_factor	1	NaN	NaN	(-)	
+T_ref	4.8497	NaN	NaN	(-)	
+        ''' % (self.kz_N0,self.c_shelter,self.i_scv,self.i_sct,self.I_scChl,self.I_scDOC,self.I_scO,self.swa_b0,self.swa_b1,self.k_BOD)
+
+        outpath = os.path.join(self.input_folder,"%s_para.txt"%self.name)
+
+        with open(outpath, 'w') as f:
+            f.write(out)
+
+        # print("{} Done".format(outpath))
+
+        return outpath
 
 
 class Graphics:
@@ -2332,8 +2644,8 @@ class Graphics:
         """
         all_performances = [['s', 'd'], ['s', 'd'], ['s', 'd']]
         variables_list = ['T', 'O2', 'Chl']
-        variables_limit = {'T': [-0.2, 24], 'O2': [-0.2, 16], 'Chl': [-0.2, 120]}
-        depth_levels = [{'surface': 0.5, 'deepwater': 5}, {'surface': 0.5}]
+        variables_limit = {'T': [-0.2, 30], 'O2': [-0.2, 20], 'Chl': [-0.2, 120]}
+        depth_levels = [{'surface': 1, 'deepwater': 6}, {'surface': 1}]
         if len(mat_data) == 2:
             water, sediment = mat_data[0], mat_data[1]
         else:
@@ -2356,7 +2668,7 @@ class Graphics:
             # define data
             comparison_file = os.path.join(self.output_folder, "%s_comparisonall.csv" % (variable_calibrated))
 
-            comparison = pd.read_csv(comparison_file, names=['Date', 'Depth', 'Observations', 'Modelisation'],
+            comparison = pd.read_csv(comparison_file, names=['Date', 'Depth', 'Observations', 'Modelisation',"datetime"],
                                      header=None, skiprows=1)
 
             comparison['variable'] = variables_dict[variable_calibrated]
@@ -2374,7 +2686,7 @@ class Graphics:
 
             # sim_file = pd.read_csv(os.path.join(self.output_folder, "%szt.csv" % variable_calibrated), header=None)
             modeldata = pd.DataFrame(columns=["Dates", "Model_surface", "Model_deepwater"])
-            modeldata['Dates'] = pd.date_range(start='1/1/2019', end='31/12/2020')
+            modeldata['Dates'] = pd.date_range(start='1/1/2018', end='31/12/2021')
 
             if variable_calibrated == "O2":
                 modeldata['Model_surface'] = sim_file[0]*0.001
@@ -2399,7 +2711,7 @@ class Graphics:
                 # define data
                 comparison_file = os.path.join(self.output_folder, "%s_comparisonall.csv" % (variable))
 
-                comparison = pd.read_csv(comparison_file, names=['Date', 'Depth', 'Observations', 'Modelisation'],
+                comparison = pd.read_csv(comparison_file, names=['Date', 'Depth', 'Observations', 'Modelisation',"datetime"],
                                          header=None, skiprows=1)
                 comparison['Dates'] = pd.to_datetime(comparison["Date"].astype(str), format='%Y%m%d')
                 comparison = comparison.set_index(comparison['Dates'])
@@ -2409,7 +2721,7 @@ class Graphics:
                                                   ax=axsV[variables_index[variable]])
                 final_performance['rmse'].append(round(rmse, 3))
                 final_performance['r2'].append(round(r_value, 3))
-            plt.show(fig1)
+            plt.show()
             if save_figures:
                 if not os.path.exists(self.figures_folder):
                     os.mkdir(self.figures_folder)
@@ -2437,7 +2749,7 @@ class Graphics:
                 # define data
                 comparison_file = os.path.join(self.output_folder, "%s_comparisonall.csv" % (variable))
 
-                comparison = pd.read_csv(comparison_file, names=['Date', 'Depth', 'Observations', 'Modelisation'],
+                comparison = pd.read_csv(comparison_file, names=['Date', 'Depth', 'Observations', 'Modelisation',"datetime"],
                                          header=None, skiprows=1)
 
                 comparison['variable'] = variables_dict[variable]
@@ -2454,7 +2766,7 @@ class Graphics:
 
                 # sim_file = pd.read_csv(os.path.join(self.output_folder, "%szt.csv" % variable), header=None)
                 modeldata = pd.DataFrame(columns=["Dates", "Model_surface", "Model_deepwater"])
-                modeldata['Dates'] = pd.date_range(start='1/1/2019', end='31/12/2020')
+                modeldata['Dates'] = pd.date_range(start='1/1/2018', end='31/12/2021')
                 if variable == "O2":
                     modeldata['Model_surface'] = sim_file[0]*0.001
                     modeldata['Model_deepwater'] = sim_file[len(sim_file.columns) - 1]*0.001
@@ -2477,29 +2789,31 @@ class Graphics:
                                                                              ax=axs[axis_index][0])
                 all_performances[axis_index] = performances
 
-                datesprofile = [dates[0], dates[floor(len(dates) / 4)], dates[floor(len(dates) / 2) - 2],
-                                dates[floor(len(dates) / 2)], dates[floor(len(dates) / 4) * 3 + 2], dates[-1]]
+                if len(dates) > 0:
+                    datesprofile = [dates[0], dates[floor(len(dates) / 4)], dates[floor(len(dates) / 2) - 2],
+                                    dates[floor(len(dates) / 2)], dates[floor(len(dates) / 4) * 3 + 2], dates[-1]]
 
-                if variable == "T":
-                    profile_pos = [[1, 0], [1, 1], [1, 2], [2, 0], [2, 1], [2, 2]]
-                else:
-                    profile_pos = [[1, 2], [1, 1], [2, 2], [2, 1], [1, 0], [2, 0]]
-                for date in datesprofile:
-                    data = comparison[comparison['Date'] == date]
-                    Depth = data['Depth'].tolist()
-                    variable_obs = data['Observations'].tolist()
-                    variable_sim = data['Modelisation'].tolist()
-                    self.profiles(variable_sim, variable_obs, Depth, variable, variables_limit, date,
-                                  axs[profile_pos[datesprofile.index(date)][1]][
-                                      profile_pos[datesprofile.index(date)][0]],
-                                  profile_pos[datesprofile.index(date)][1], profile_pos[datesprofile.index(date)][0])
 
-                    # plt.tight_layout(h_pad=0.5, rect=[0.05, 0.05, 0.05, 0.05])
-                if variable == "T":
-                    axs[2, 1].xaxis.set_visible(True)
-                    axs[2, 2].xaxis.set_visible(True)
+                    if variable == "T":
+                        profile_pos = [[1, 0], [1, 1], [1, 2], [2, 0], [2, 1], [2, 2]]
+                    else:
+                        profile_pos = [[1, 2], [1, 1], [2, 2], [2, 1], [1, 0], [2, 0]]
+                    for date in datesprofile:
+                        data = comparison[comparison['Date'] == date]
+                        Depth = data['Depth'].tolist()
+                        variable_obs = data['Observations'].tolist()
+                        variable_sim = data['Modelisation'].tolist()
+                        self.profiles(variable_sim, variable_obs, Depth, variable, variables_limit, date,
+                                      axs[profile_pos[datesprofile.index(date)][1]][
+                                          profile_pos[datesprofile.index(date)][0]],
+                                      profile_pos[datesprofile.index(date)][1], profile_pos[datesprofile.index(date)][0])
+
+                        # plt.tight_layout(h_pad=0.5, rect=[0.05, 0.05, 0.05, 0.05])
+                    if variable == "T":
+                        axs[2, 1].xaxis.set_visible(True)
+                        axs[2, 2].xaxis.set_visible(True)
             plt.subplots_adjust(wspace=0.1, hspace=0.1)
-            plt.show(fig2)
+            plt.show()
         if save_figures:
             if not os.path.exists(self.figures_folder):
                 os.mkdir(self.figures_folder)
@@ -2515,9 +2829,210 @@ class Graphics:
             else:
                 M_score = int(M_score)
                 break
-        Note = input("Calibration Note (press Enter is nothing to note): ")
+        Note = input("Calibration Note (press Enter to continue): ")
 
         return all_performances, final_performance, M_score, Note
+
+
+    def Sediment_figures_comparison_timeseries_and_profiles(self, save_figures=False, iteration=0, overall=True, byvariable=True,
+                                                   variable_calibrated='PT', mat_data=[]):
+        """
+
+        :param variable:
+        :param save_figures:
+        :return:
+        """
+        all_performances = [['s', 'd'], ['s', 'd'], ['s', 'd']]
+        variables_list = ['T', 'O2', 'Chl']
+        # variables_limit = {'T': [-0.2, 30], 'O2': [-0.2, 20], 'Chl': [-0.2, 120]}
+        # depth_levels = [{'surface': 1, 'deepwater': 6}, {'surface': 1}]
+        if len(mat_data) == 2:
+            water, sediment = mat_data[0], mat_data[1]
+        else:
+            water = mat_data
+
+        # figure by variable
+        if byvariable:
+            fig1 = plt.figure(frameon=False)
+            ax1 = plt.subplot(2, 3, 1)
+            ax2 = plt.subplot(2, 3, 2)
+            ax3 = plt.subplot(2, 3, 3)
+            ax4 = plt.subplot(2, 1, 2)
+            axsV = [ax1, ax2, ax3, ax4]
+            manager = plt.get_current_fig_manager()
+            manager.window.showMaximized()
+
+            # plt.tight_layout(h_pad=0.5, rect=[0.05, 0.05, 0.05, 0.05])
+            # print("\n%s" % variable_calibrated)
+
+            # define data
+            comparison_file = os.path.join(self.output_folder, "%s_comparisonall.csv" % (variable_calibrated))
+
+            comparison = pd.read_csv(comparison_file, names=['Date', 'Depth', 'Observations', 'Modelisation',"datetime"],
+                                     header=None, skiprows=1)
+
+            comparison['variable'] = variables_dict[variable_calibrated]
+            comparison['Dates'] = pd.to_datetime(comparison["Date"].astype(str), format='%Y%m%d')
+            comparison = comparison.set_index(comparison['Dates'])
+
+            dates = list(comparison['Date'].unique())
+
+            if variable_calibrated == "T":
+                sim_file = pd.DataFrame(water['T'][0, 0]).transpose()
+            else:
+                data = water['concentrations'][0, 0][variable_calibrated][0, 0]
+                sim_file = pd.DataFrame(data).transpose()
+
+
+            # sim_file = pd.read_csv(os.path.join(self.output_folder, "%szt.csv" % variable_calibrated), header=None)
+            modeldata = pd.DataFrame(columns=["Dates", "Model_surface", "Model_deepwater"])
+            modeldata['Dates'] = pd.date_range(start='1/1/2018', end='31/12/2021')
+
+            if variable_calibrated == "O2":
+                modeldata['Model_surface'] = sim_file[0]*0.001
+                modeldata['Model_deepwater'] = sim_file[len(sim_file.columns) - 1]*0.001
+            else:
+                modeldata['Model_surface'] = sim_file[0]
+                modeldata['Model_deepwater'] = sim_file[len(sim_file.columns) - 1]
+
+            results, performances = self.comparison_obs_sims_plot_V2(
+                variable_analized=variables_dict[variable_calibrated], modeldata=modeldata, obsdata=comparison,
+                depthlayers=depth_levels[0], ax=axsV[3], individual=True)
+
+            # plt.tight_layout(h_pad=0.5, rect=[0.05, 0.05, 0.05, 0.05])
+            # plt.show()
+
+            datesprofile = [dates[0], dates[floor(len(dates) / 4)], dates[floor(len(dates) / 2) - 2],
+                            dates[floor(len(dates) / 2)], dates[floor(len(dates) / 4) * 3 + 2], dates[-1]]
+
+            final_performance = {'rmse': [], 'r2': []}
+            for variable in variables_list:
+                variables_index = {'T': 0, 'O2': 1, 'Chl': 2}
+                # define data
+                comparison_file = os.path.join(self.output_folder, "%s_comparisonall.csv" % (variable))
+
+                comparison = pd.read_csv(comparison_file, names=['Date', 'Depth', 'Observations', 'Modelisation',"datetime"],
+                                         header=None, skiprows=1)
+                comparison['Dates'] = pd.to_datetime(comparison["Date"].astype(str), format='%Y%m%d')
+                comparison = comparison.set_index(comparison['Dates'])
+
+                r_value, rmse = self.graphiqueTOC(comparison['Observations'], comparison['Modelisation'],
+                                                  comparison['Depth'], variable=variable,
+                                                  ax=axsV[variables_index[variable]])
+                final_performance['rmse'].append(round(rmse, 3))
+                final_performance['r2'].append(round(r_value, 3))
+            plt.show()
+            if save_figures:
+                if not os.path.exists(self.figures_folder):
+                    os.mkdir(self.figures_folder)
+                fig1.savefig(os.path.join(self.figures_folder, "%s_%s_ite_%s_TOC_comparison.png" % (
+                variable_calibrated, self.save_date, iteration)))
+            fig1.canvas.mpl_connect('close_event', lambda _: fig1.canvas.manager.window.destroy())
+            plt.close('all')
+
+            # overall figure
+        if overall:
+            fig2, axs = plt.subplots(3, 3, gridspec_kw={'width_ratios': [3, 1, 1], 'height_ratios': [1, 1, 1]},
+                                     frameon=False)
+
+            manager = plt.get_current_fig_manager()
+            manager.window.showMaximized()
+
+            for variable in variables_list:
+                print("\n%s" % variable)
+                axis_index = variables_list.index(variable)
+
+                # [0,0] [0,1] [0,2]
+                # [1,0] [1,1] [1,2]
+                # [2,0] [2,1] [2,2]
+
+                # define data
+                comparison_file = os.path.join(self.output_folder, "%s_comparisonall.csv" % (variable))
+
+                comparison = pd.read_csv(comparison_file, names=['Date', 'Depth', 'Observations', 'Modelisation',"datetime"],
+                                         header=None, skiprows=1)
+
+                comparison['variable'] = variables_dict[variable]
+                comparison['Dates'] = pd.to_datetime(comparison["Date"].astype(str), format='%Y%m%d')
+                comparison = comparison.set_index(comparison['Dates'])
+
+                dates = list(comparison['Date'].unique())
+
+                if variable == "T":
+                    sim_file = pd.DataFrame(water['T'][0, 0]).transpose()
+                else:
+                    data = water['concentrations'][0, 0][variable][0, 0]
+                    sim_file = pd.DataFrame(data).transpose()
+
+                # sim_file = pd.read_csv(os.path.join(self.output_folder, "%szt.csv" % variable), header=None)
+                modeldata = pd.DataFrame(columns=["Dates", "Model_surface", "Model_deepwater"])
+                modeldata['Dates'] = pd.date_range(start='1/1/2018', end='31/12/2021')
+                if variable == "O2":
+                    modeldata['Model_surface'] = sim_file[0]*0.001
+                    modeldata['Model_deepwater'] = sim_file[len(sim_file.columns) - 1]*0.001
+                else:
+                    modeldata['Model_surface'] = sim_file[0]
+                    modeldata['Model_deepwater'] = sim_file[len(sim_file.columns) - 1]
+
+                if variable == "Chl":
+                    results, performances = self.comparison_obs_sims_plot_V2(variable_analized=variables_dict[variable],
+                                                                             modeldata=modeldata,
+                                                                             obsdata=comparison,
+                                                                             depthlayers=depth_levels[1],
+                                                                             ax=axs[axis_index][0])
+
+                else:
+                    results, performances = self.comparison_obs_sims_plot_V2(variable_analized=variables_dict[variable],
+                                                                             modeldata=modeldata,
+                                                                             obsdata=comparison,
+                                                                             depthlayers=depth_levels[0],
+                                                                             ax=axs[axis_index][0])
+                all_performances[axis_index] = performances
+
+                if len(dates) > 0:
+                    datesprofile = [dates[0], dates[floor(len(dates) / 4)], dates[floor(len(dates) / 2) - 2],
+                                    dates[floor(len(dates) / 2)], dates[floor(len(dates) / 4) * 3 + 2], dates[-1]]
+
+
+                    if variable == "T":
+                        profile_pos = [[1, 0], [1, 1], [1, 2], [2, 0], [2, 1], [2, 2]]
+                    else:
+                        profile_pos = [[1, 2], [1, 1], [2, 2], [2, 1], [1, 0], [2, 0]]
+                    for date in datesprofile:
+                        data = comparison[comparison['Date'] == date]
+                        Depth = data['Depth'].tolist()
+                        variable_obs = data['Observations'].tolist()
+                        variable_sim = data['Modelisation'].tolist()
+                        self.profiles(variable_sim, variable_obs, Depth, variable, variables_limit, date,
+                                      axs[profile_pos[datesprofile.index(date)][1]][
+                                          profile_pos[datesprofile.index(date)][0]],
+                                      profile_pos[datesprofile.index(date)][1], profile_pos[datesprofile.index(date)][0])
+
+                        # plt.tight_layout(h_pad=0.5, rect=[0.05, 0.05, 0.05, 0.05])
+                    if variable == "T":
+                        axs[2, 1].xaxis.set_visible(True)
+                        axs[2, 2].xaxis.set_visible(True)
+            plt.subplots_adjust(wspace=0.1, hspace=0.1)
+            plt.show()
+        if save_figures:
+            if not os.path.exists(self.figures_folder):
+                os.mkdir(self.figures_folder)
+            fig2.savefig(os.path.join(self.figures_folder, "%s_%s_ite_%s_timeseries_and_profiles.png" % (
+            variable_calibrated, self.save_date, iteration)))
+        fig2.canvas.mpl_connect('close_event', lambda _: fig2.canvas.manager.window.destroy())
+        plt.close('all')
+        while True:
+            M_score = input("Calibration Score (between 0 to 10): ")
+            if M_score.upper() not in ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'):
+                print("answer giving is not an option, choose between 0 and 10.\n")
+                continue
+            else:
+                M_score = int(M_score)
+                break
+        Note = input("Calibration Note (press Enter to continue): ")
+
+        return all_performances, final_performance, M_score, Note
+
 
     def graphiqueTOC(self, x, y, z, variable, ax=None):
 
@@ -2571,7 +3086,10 @@ class Graphics:
             markers = ['o'] * 12
         else:
             linearg = {'color': colorpalette[0], 'label': "y= x", 'linewidth': 1, 'linestyle': '--'}
-            r_value, rmse = base_plot_comparison(xall, yall, lineStart=lineStart, lineEnd=lineEnd, ax=ax, linecolor="k")
+            if xall != [] and yall != []:
+                r_value, rmse = base_plot_comparison(xall, yall, lineStart=lineStart, lineEnd=lineEnd, ax=ax, linecolor="k")
+            else:
+                r_value, rmse = np.nan,np.nan
             line_plot(lineStart=lineStart, lineEnd=lineEnd, ax=ax, linearg=linearg)
             # ccmap = 'Blues'
             markers = ['^'] * 12
@@ -2663,6 +3181,48 @@ class Graphics:
             axisV.set_xlabel(variable, horizontalalignment='right', x=0.0)
             axisV.xaxis.label.set_color(markerColorByVariable[variable])
 
+    def profile_sediments(self, variable_sim, variable_obs, Depth, variable, variables_limit, date, ax=None, horizontal=0,
+        vertical=0):
+
+        if ax is None:
+            ax = plt.gca()
+        axisV = ax
+
+        offset = 60
+
+        markerStyleByVariable = "o"
+        markerStyleByVariable = {"T": "s", "O2": "o", "Chl": "^"}
+        markerColorByVariable = {"T": "b", "O2": "r", "Chl": "g"}
+        axisV.plot(variable_sim, Depth, 'k%s--' % (markerStyleByVariable), fillstyle='none',
+                   markersize=int(self.scatterDotSize / 10))
+        axisV.plot(variable_obs, Depth, '%s%s-' % (markerColorByVariable, markerStyleByVariable),
+                   markersize=int(self.scatterDotSize / 10))
+        axisV.set_ylim(30, 0)
+        axisV.set_xlim(variables_limit[variable][0], variables_limit[variable][1])
+
+        if horizontal == 0 and variable != 'T':
+            axisV.tick_params(axis='x', colors=markerColorByVariable[variable])
+            if variable == "O2":
+                axisV.set_xlabel(variable, horizontalalignment='right', x=1.0)
+
+            else:
+                # Offset the twin axis below the host
+                axisV.spines["top"].set_position(("axes", 1.23))
+                axisV.set_xlabel(variable, horizontalalignment='left', x=0.0)
+                axisV.get_xaxis().set_label_coords(-0.03, 1.12)
+
+            axisV.xaxis.set_visible(True)
+            axisV.xaxis.label.set_color(markerColorByVariable[variable])
+
+        else:
+            axisV.xaxis.set_visible(False)
+
+        if horizontal == 2 and variable == 'T':
+            axisV.xaxis.set_visible(True)
+            axisV.tick_params(axis='x', colors=markerColorByVariable[variable])
+            axisV.set_xlabel(variable, horizontalalignment='right', x=0.0)
+            axisV.xaxis.label.set_color(markerColorByVariable[variable])
+
     def comparison_obs_sims_plot_V2(self, variable_analized, modeldata, obsdata, depthlayers, ax=None,
                                     individual=False):
         """
@@ -2678,14 +3238,17 @@ class Graphics:
         :return:
         """
 
+
+
         markerStyleByVariable = {"Temperature": "s", "DO concentration": "o", "Chlorophyll a": "^"}
-        markerColorByVariable = {"Temperature": "blue", 'DO concentration': "red", "Chlorophyll a": "green"}
+        markerColorByVariable = {"Temperature":"b", 'DO concentration': "red", "Chlorophyll a": "green"}
         lineColorByWaterLevel = {"surface": 'black', "deepwater": markerColorByVariable[variable_analized]}
         lineStyleByWaterLevel = {"surface": "-.", "deepwater": "-"}
         markerfillingByWaterLevel = {"surface": 'none', "deepwater": markerColorByVariable[variable_analized]}
+        markeredgeByWaterLevel = {"surface": 'k', "deepwater": 'k'}
         # sns.set_style("ticks", {"xtick.major.size": 100, "ytick.major.size": 100})
 
-        linewidthByWaterLevel = self.lineswidth
+        linewidthByWaterLevel = [{"surface": 1, "deepwater": 1},self.lineswidth]
         orderPlotPresentedByWaterLevel = {"surface": 100, "deepwater": 10}
         scatterPlotDotSize = self.scatterDotSize
         transparenceLineplot = 0.8
@@ -2702,9 +3265,9 @@ class Graphics:
         if variable_analized == "DO Concentration":
             limit = [-0.5, 20]
         elif variable_analized == "Temperature":
-            limit = [-0.5, 25]
+            limit = [-0.5, 30]
         else:
-            limit = [-0.5, 25]
+            limit = [-0.5, 20]
         results = pd.DataFrame(columns=[])
         stop = False
 
@@ -2727,7 +3290,7 @@ class Graphics:
                         result.set_index('Dates', inplace=True)
 
                         # Plot each method and observations
-                        lineplotstyle = {"linewidth": linewidthByWaterLevel[depth_level],
+                        lineplotstyle = {"linewidth": linewidthByWaterLevel[1][depth_level],
                                          "color": lineColorByWaterLevel[depth_level],
                                          "zorder": orderPlotPresentedByWaterLevel[depth_level],
                                          "linestyle": lineStyleByWaterLevel[depth_level],
@@ -2743,10 +3306,10 @@ class Graphics:
                         result = concact
 
                         scatterplotstyle = {'marker': markerStyleByVariable[variable_analized],
-                                            's': scatterPlotDotSize, "edgecolor": 'k',
+                                            's': scatterPlotDotSize, "edgecolor": markeredgeByWaterLevel[depth_level],
                                             "facecolors": markerfillingByWaterLevel[depth_level],
 
-                                            "linewidth": linewidthByWaterLevel[depth_level],
+                                            "linewidth": linewidthByWaterLevel[0][depth_level],
                                             "zorder": orderPlotPresentedByWaterLevel[depth_level]}
 
                         if not individual:
@@ -2762,7 +3325,9 @@ class Graphics:
                                       observeddata=obsdata.loc[obsdata['Depth'] == depthlayer]["Observations"],
                                       observeddates=obsdata.loc[obsdata['Depth'] == depthlayer]["Dates"],
                                       ax=ax, ylimit=limit, sct_kwargs=scatterplotstyle, line_kwargs=lineplotstyle)
-
+                        first_year = date(int(obsdata.loc[obsdata['Depth'] == depthlayer]["Dates"].min().year) ,1,1)# first date
+                        last_year = date(int(obsdata.loc[obsdata['Depth'] == depthlayer]["Dates"].max().year),12,31) # Latest date
+                        ax.set_xlim([first_year, last_year])
                         # linepos = ["surface", "deepwater"].index(depth_level)
                         # ax.lines[linepos].set_linestyle(lineStyleByWaterLevel[depth_level])
 
@@ -2796,7 +3361,7 @@ class Graphics:
                         result.set_index('Dates', inplace=True)
 
                         # Plot each method and observations
-                        lineplotstyle = {"linewidth": linewidthByWaterLevel[depth_level],
+                        lineplotstyle = {"linewidth": linewidthByWaterLevel[1][depth_level],
                                          "color": lineColorByWaterLevel[depth_level],
                                          "zorder": orderPlotPresentedByWaterLevel[depth_level],
                                          "alpha": transparenceLineplot}
@@ -2816,25 +3381,42 @@ class Graphics:
                         scatterplotstyle = {'marker': markerStyleByVariable[variable_analized],
                                             's': scatterPlotDotSize, "edgecolor": 'k',
                                             "facecolors": markerfillingByWaterLevel[depth_level],
-                                            "linewidth": linewidthByWaterLevel[depth_level],
+                                            "linewidth": linewidthByWaterLevel[0][depth_level],
                                             "linestyle": lineStyleByWaterLevel[depth_level],
                                             "zorder": orderPlotPresentedByWaterLevel[depth_level]}
 
                         if not individual:
-                            performances = self.lake.stats_lake(
-                                obsdata.loc[obsdata['Depth'] == depthlayer]["Observations"],
-                                obsdata.loc[obsdata['Depth'] == depthlayer]["Modelisation"])
+                            if len(obsdata.loc[obsdata['Depth'] == depthlayer]["Observations"]) > 0:
+                                performances = self.lake.stats_lake(
+                                    obsdata.loc[obsdata['Depth'] == depthlayer]["Observations"],
+                                    obsdata.loc[obsdata['Depth'] == depthlayer]["Modelisation"])
+
+                            else:
+                                performances = [np.nan,np.nan,np.nan,np.nan,np.nan,np.nan,np.nan]
+
                             print(
                                 "Performances Result for %s :\nRMSE : %s NSE : %s RSR : %s Pbias : %s \nR2 : %s SOS : %s nrmse : %s" % (
                                     depth_level, performances[0], performances[1], performances[2], performances[3],
                                     performances[4],
                                     performances[5], performances[6]))
 
+
                         timeline_plot(modeleddata=model_data["Model_%s" % (depth_level)],
                                       modeleddates=model_data['Dates'],
                                       observeddata=obsdata.loc[obsdata['Depth'] == depthlayer]["Observations"],
                                       observeddates=obsdata.loc[obsdata['Depth'] == depthlayer]["Dates"],
                                       ax=ax, ylimit=limit, sct_kwargs=scatterplotstyle, line_kwargs=lineplotstyle)
+                        if len(obsdata.loc[obsdata['Depth'] == depthlayer]["Observations"]) > 0:
+                            first_year = date(int(2020), 1, 1)  # first date
+                            last_year = date(int(obsdata.loc[obsdata['Depth'] == depthlayer]["Dates"].max().year), 12,
+                                             31)  # Latest date
+                            ax.set_xlim([first_year, last_year])
+                        else:
+                            first_year = date(int(2020), 1, 1)  # first date
+                            last_year = date(int(2021),
+                                             12,
+                                             31)  # Latest date
+                            ax.set_xlim([first_year, last_year])
                         linepos = ["surface", "deepwater"].index(depth_level)
                         ax.lines[linepos].set_linestyle(lineStyleByWaterLevel[depth_level])
 
@@ -2858,7 +3440,7 @@ class Graphics:
                                           linespacing=0.8)
 
                         # legend
-                        ax.get_legend().remove()
+                        # ax.get_legend().remove()
                         # legends = ax.legend(legendNames,ncol= len(legendNames))
                         # legends.get_frame().set_facecolor('#FFFFFF')
                 # ax.set_xticklabels([2019,2020,2021], rotation=(0), va='bottom', ha='center')
@@ -2877,12 +3459,26 @@ class Graphics:
 if __name__ == "__main__":
     # ask for lake
     # print("Figure generation")
-    # Graphics(Lake('Nedre')).figures_comparison_timeseries_and_profiles()
+    # Graphics(Lake('Bromont')).figures_comparison_timeseries_and_profiles()
     # matlab_directory = matlab_folder
     matlab_directory = ask_for_matlab_directory()
-    lake_name = aks_for_which_lake_wanted_to_calibrated()
-    save_option = ask_what_to_save()
+    lake_name = "Bromont"#aks_for_which_lake_wanted_to_calibrated()
+    save_option = [True, True, False, False]#ask_what_to_save()
 
     print("\n------------------- Manual Calibration will Start for lake %s -------------------\n" % lake_name)
-    lake = Lake(lake_name).manual_calibration_loop(save_option[0], save_option[1], save_option[2], save_option[3],
-                                                   matlab=matlab_directory)
+    start = 0
+    while True:
+        if start != 0:
+            continue_calibration = input("Try the calibration with another variable ? \n"
+                                         "Anything other than 'Y' or 'y'(not case sensitive) will terminate the calibration ")
+            if continue_calibration.upper() in ["Y"]:
+                lake = Lake(lake_name).manual_calibration_loop(save_option[0], save_option[1], save_option[2], save_option[3],matlab=matlab_directory)
+
+                continue
+            else:
+                break
+        else:
+            lake = Lake(lake_name).manual_calibration_loop(save_option[0], save_option[1], save_option[2],
+                                                           save_option[3], matlab=matlab_directory)
+            start += 1
+

@@ -298,7 +298,7 @@ class Simulation_informations:
         meteo = meteo.reindex(all_days, fill_value=np.nan)
         # meteo = meteo.reindex(all_days)
         meteo["Date"] = meteo.index
-        meteo = meteo.interpolate(method='index', limit=4, limit_direction= 'both')
+        meteo = meteo.interpolate(method='pad', limit=4, limit_direction= 'forward')
 
 
         meteo["month_day"] = meteo['Date'].dt.strftime('%m-%d')
@@ -322,14 +322,15 @@ class Simulation_informations:
         #     meteo.iloc[int(emptyrows[i]),int(emptycolumns[i])] = meteoaverageline.iloc[0,int(emptycolumns[i])]
 
 
-        meteo = meteo.interpolate('index').ffill()
-        meteo = meteo.interpolate('index').bfill()
+        meteo = meteo.interpolate('pad').ffill()
+        meteo = meteo.interpolate('pad').bfill()
+
+        meteo.to_csv(self.climate_file.replace('.csv','_filled_interpolate.csv'), index=False)
 
         'Year	Month	Day	GlobalRadiation	CloudCover	AirTemperature	RelativeHumidity	AirPressure	WindSpeed	Precipitation	InflowQ	InflowT	InflowC	POC	InflowTP'
         '	InflowDOP	InflowChla	DOC	DIC	O	NO3	NH4	SO4	Fe2	Ca2	pH	CH4	Fe3	Al3	SiO4	SiO2	diatom	POP'
 
         if self.enable_river_inflow:
-            # Part of the script that use real information from the lakes analysed (when weather for 2018-2020, need change the +10)
             inflows_data = pd.read_csv(inflows_filename)
             inflows_data = inflows_data.interpolate()
 
@@ -409,7 +410,7 @@ class Simulation_informations:
             # stream_TP = np.repeat([5], repeats = ndays)[repeati].reshape((mlndays, 1))
             stream_DOP = np.repeat([1], repeats=ndays)[repeati].reshape((mlndays, 1))
             stream_SS = np.repeat([0.01], repeats=ndays)[repeati].reshape((mlndays, 1))
-            stream_Chl = np.repeat([0.01], repeats=ndays)[repeati].reshape((mlndays, 1))
+            stream_Chl = np.repeat([0.1], repeats=ndays)[repeati].reshape((mlndays, 1))
             stream_DOC = np.repeat([2000], repeats=ndays)[repeati].reshape(
                 (mlndays, 1))  # MC 06-01-2018 initial parameters 8000
             stream_DIC = np.repeat([20000], repeats=ndays)[repeati].reshape((mlndays, 1))
@@ -468,15 +469,15 @@ class Simulation_informations:
             repeati = list(range(ndays))  # list(range(365)) + list(range(365)) + list(range(ndays))
             # print(len(mlyear), len(meteo['rsds'][repeati]), mlndays)
             spacer = np.repeat([0], repeats=ndays)[repeati].reshape((mlndays, 1))
-            # stream_Q = np.repeat([2000], repeats = ndays)[repeati].reshape((mlndays, 1))
-            # stream_T = np.repeat([10], repeats = ndays)[repeati].reshape((mlndays, 1))
+            stream_Q = np.repeat([2000], repeats = ndays)[repeati].reshape((mlndays, 1))
+            stream_T = np.repeat([10], repeats = ndays)[repeati].reshape((mlndays, 1))
             stream_O = np.repeat([12000], repeats=ndays)[repeati].reshape(
                 (mlndays, 1))  # MC 06-01-2018 initial parameters stream_O:8000
             stream_C = np.repeat([0.5], repeats=ndays)[repeati].reshape((mlndays, 1))
-            # stream_TP = np.repeat([5], repeats = ndays)[repeati].reshape((mlndays, 1))
+            stream_TP = np.repeat([5], repeats = ndays)[repeati].reshape((mlndays, 1))
             stream_DOP = np.repeat([1], repeats=ndays)[repeati].reshape((mlndays, 1))
             stream_SS = np.repeat([0.01], repeats=ndays)[repeati].reshape((mlndays, 1))
-            stream_Chl = np.repeat([0.01], repeats=ndays)[repeati].reshape((mlndays, 1))
+            stream_Chl = np.repeat([1], repeats=ndays)[repeati].reshape((mlndays, 1))
             stream_DOC = np.repeat([2000], repeats=ndays)[repeati].reshape(
                 (mlndays, 1))  # MC 06-01-2018 initial parameters 8000
             stream_DIC = np.repeat([20000], repeats=ndays)[repeati].reshape((mlndays, 1))
@@ -494,11 +495,11 @@ class Simulation_informations:
                                        # np.repeat([0], repeats = ndays)[repeati].reshape((mlndays, 1)),
                                        meteo['Wind speed'][repeati].values.reshape((mlndays, 1)),
                                        meteo['Precipitation'][repeati].values.reshape((mlndays, 1)),
-                                       spacer,spacer,
+                                       stream_Q,stream_T,
                                        stream_C, stream_SS,  # C, SS
-                                       spacer, stream_DOP,
+                                       stream_TP, stream_DOP,
                                        # InflowTP InflowDOP
-                                       stream_Chl, spacer,
+                                       stream_Chl, stream_DOC,
                                        # Chl, DOC
                                        stream_DIC, stream_O, spacer, spacer,  # DIC, O, NO3, NH4
                                        spacer, spacer, spacer,spacer,
@@ -568,10 +569,10 @@ class Lake:
                                                                                     observation_concentration)
 
         lines = ['\t'.join(
-            [('%.2f' % d), ('%.0f' % a)] + [('%.2f' % tz)] + ['0'] + ['0'] * 5 + ['0'] * 5 + [('%.2f' % o2z)] + ['0'] * 8 +
+            [('%.2f' % d), ('%.0f' % a)] + [('%.2f' % tz)] + ['0'] + ['0'] + ['200']+ ['4']+ ['11'] + ['0'] * 6 + [('%.2f' % o2z)] + ['0'] * 8 +
             ['0'] + ['0'] * 6 + ['0'])
             for d, a, tz,  o2z in
-            zip(depth_levels, area_levels, Tz, O2z)]
+            zip(depth_levels, area_levels, Tz, O2z)] # phophore and chlorophyl from "Macrozooplankton and the persistence of the deepchlorophyll maximum in a stratiﬁed lake"(pannard, 2015)
 
         # lines[0] = lines[0] + '\t0\t0'  # snow and ice, plus 16 dummies
         firstlines = '''skip 

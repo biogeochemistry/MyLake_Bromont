@@ -323,8 +323,22 @@ def extract_observations(lakes: dict, rawdata_path: str = raw_obs_directory,
         observation_data = observation_data.sort_values("Date_Depth")
 
         # Generate bathymetry file
+        observation_file = os.path.join(observation_path, lake, "%s_observation_data_all.csv" % lake)
+        observation_data.to_csv(observation_file, index=False)
+
+        # Add data to DataFrame
+
+        observation_data_names = list(observation_data.columns).remove("Time")
+        observation_data['DO'] = observation_data['DO'].astype(float)
+        observation_data1 = observation_data[["Full_Name","Lake","Date","Depth","Date_Depth",'DO']].groupby(["Full_Name","Lake","Date","Depth","Date_Depth"], dropna=False).mean()
+        observation_data = observation_data.groupby(["Full_Name","Lake","Date","Depth","Date_Depth"],dropna=False).mean()
+        observation_data.reset_index(inplace=True)
+
+
+        # Generate bathymetry file
         observation_file = os.path.join(observation_path, lake, "%s_observation_data.csv" % lake)
         observation_data.to_csv(observation_file, index=False)
+
 
     return "Files generated"
 
@@ -333,45 +347,133 @@ def extract_climate(climat_directory: str = raw_weather_directory, observation_p
     all_data = pd.DataFrame()
     n = 1
     for file in all_files:
-        print("##### File %s of %s : %s #####"%(n, len(all_files),file))
-        n+=1
-        data_dict = get_information_from_file_as_dataframe(file)
-        wind_ajustment = True
-        if type(data_dict) is dict:
-            for key in data_dict:
-                data = data_dict[key]
-                if 'Date' in data.columns:
-                    data = data[data['Date'].notnull()]
-                    data.loc[:,'Date'] = data.loc[:,'Date'].dt.strftime('%Y-%m-%d')
-                    data.loc[:,'Date'] = pd.to_datetime(data.loc[:,'Date']).dt.floor('d')
-                    data = data[data['Date'].notnull()]
+        if "original_with_issue" not in file:
+            print("##### File %s of %s : %s #####"%(n, len(all_files),file))
+            n+=1
+            data_dict = get_information_from_file_as_dataframe(file)
+            wind_ajustment = True
+            if type(data_dict) is dict:
+                for key in data_dict:
+                    data = data_dict[key]
+                    if 'Date' in data.columns:
+                        data = data[data['Date'].notnull()]
+                        data.loc[:,'Date'] = data.loc[:,'Date'].dt.strftime('%Y-%m-%d')
+                        data.loc[:,'Date'] = pd.to_datetime(data.loc[:,'Date']).dt.floor('d')
+                        data = data[data['Date'].notnull()]
 
-                elif 'Dates' in data.columns:
-                    data = data[data['Dates'].notnull()]
-                    # data['Dates'] = data['Dates'].dt.strftime('%Y-%m-%d')
-                    data.loc[:,'Date'] = pd.to_datetime(data.loc[:,'Dates']).dt.floor('d')
-                    data = data[data['Date'].notnull()]
+                    elif 'Dates' in data.columns:
+                        data = data[data['Dates'].notnull()]
+                        # data['Dates'] = data['Dates'].dt.strftime('%Y-%m-%d')
+                        data.loc[:,'Date'] = pd.to_datetime(data.loc[:,'Dates']).dt.floor('d')
+                        data = data[data['Date'].notnull()]
 
-                elif 'Date de mesure'in data.columns:
-                    data = data[data['Date de mesure'].notnull()]
-                    # data['Date de mesure'] = data['Date de mesure'].dt.strftime('%Y-%m-%d')
-                    data.loc[:,'Date'] = pd.to_datetime(data.loc[:,'Date de mesure']).dt.floor('d')
-                    data = data[data['Date'].notnull()]
+                    elif 'Date de mesure'in data.columns:
+                        data = data[data['Date de mesure'].notnull()]
+                        # data['Date de mesure'] = data['Date de mesure'].dt.strftime('%Y-%m-%d')
+                        data.loc[:,'Date'] = pd.to_datetime(data.loc[:,'Date de mesure']).dt.floor('d')
+                        data = data[data['Date'].notnull()]
 
+                    if all_data.empty:
+                        for col in data.columns:
+                            if col in variables_dict:
+                                all_data[variables_dict[col]] = data[col]
+                                if col == "Vitesse du vent, m/s":
+                                    wind_ajustment = False
+                        if len(all_data.columns) > 1:
+                            all_data["Date"] = pd.to_datetime(all_data['Date'].astype(str), format='%Y-%m-%d')
+                            organized_data = pd.DataFrame()
+                            for column in all_data.columns:
+                                if column == "Precipitation":
+                                    subselect_data = all_data.groupby(["Date"]).sum()
+                                    subselect_data.reset_index(inplace=True)
+                                    subselect_data = subselect_data[["Date",column]]
+                                    organized_data = pd.concat([organized_data, subselect_data], sort=False, ignore_index=True)
+                                elif column == "Global radiation":
+                                    subselect_data = all_data.groupby(["Date"]).mean() * (86000 / 1000000)
+                                    subselect_data.reset_index(inplace=True)
+                                    subselect_data = subselect_data[["Date", column]]
+                                    organized_data = pd.concat([organized_data, subselect_data], sort=False, ignore_index=True)
+                                elif column == "Wind speed" and wind_ajustment:
+                                    subselect_data = all_data.groupby(["Date"]).mean() * (1000 / 3600)
+                                    subselect_data.reset_index(inplace=True)
+                                    subselect_data = subselect_data[["Date", column]]
+                                    organized_data = pd.concat([organized_data, subselect_data], sort=False, ignore_index=True)
+                                elif column != "Date":
+                                    subselect_data = all_data.groupby(["Date"]).mean()
+                                    subselect_data.reset_index(inplace=True)
+                                    subselect_data = subselect_data[["Date", column]]
+                                    organized_data = pd.concat([organized_data, subselect_data], sort=False, ignore_index=True)
+
+
+                            all_data = organized_data
+
+                            # if "Precipitation" in all_data.columns:
+                            #     all_data = all_data.groupby(["Date"]).sum()
+                            #     all_data.reset_index(inplace=True)
+                            # elif "Global radiation" in all_data.columns:
+                            #     all_data = all_data.groupby(["Date"]).mean() * (86000 / 1000000)
+                            # elif "Wind speed" in all_data.columns:
+                            #     all_data = all_data.groupby(["Date"]).mean() * (1000 / 3600)
+                            # else:
+                            #     all_data = all_data.groupby(["Date"]).mean()
+                        else:
+                            all_data = pd.DataFrame()
+                    else:
+                        select_data = pd.DataFrame()
+                        for col in data.columns:
+                            if col in variables_dict:
+                                select_data[variables_dict[col]] = data[col]
+                                if col == "Vitesse du vent, m/s":
+                                    wind_ajustment = False
+                        if len(select_data.columns) > 1:
+                            select_data["Date"] = pd.to_datetime(select_data['Date'].astype(str), format='%Y-%m-%d')
+                            for column in select_data.columns:
+                                if column == "Precipitation":
+                                    subselect_data = select_data.groupby(["Date"]).sum()
+                                    subselect_data.reset_index(inplace=True)
+                                    subselect_data = subselect_data[["Date",column]]
+                                    all_data = pd.concat([all_data, subselect_data], sort=False, ignore_index=True)
+                                elif column == "Global radiation":
+                                    subselect_data = select_data.groupby(["Date"]).mean() * (86000 / 1000000)
+                                    subselect_data.reset_index(inplace=True)
+                                    subselect_data = subselect_data[["Date", column]]
+                                    all_data = pd.concat([all_data, subselect_data], sort=False, ignore_index=True)
+                                elif column == "Wind speed" and wind_ajustment:
+                                    subselect_data = select_data.groupby(["Date"]).mean() * (1000 / 3600)
+                                    subselect_data.reset_index(inplace=True)
+                                    subselect_data = subselect_data[["Date", column]]
+                                    all_data = pd.concat([all_data, subselect_data], sort=False, ignore_index=True)
+                                elif column != "Date":
+                                    subselect_data = select_data[["Date", column]]
+                                    subselect_data.loc[:,column] = select_data.loc[:,column].astype(float)
+                                    subselect_data = subselect_data.groupby(["Date"]).mean()
+                                    subselect_data.reset_index(inplace=True)
+                                    # subselect_data = subselect_data[["Date", column]]
+                                    all_data = pd.concat([all_data, subselect_data], sort=False, ignore_index=True)
+
+                            # elif "Global radiation" in select_data.columns:
+                            #     select_data = select_data.groupby(["Date"]).mean() * (86000 / 1000000)
+                            # elif "Wind speed" in select_data.columns:
+                            #     select_data = select_data.groupby(["Date"]).mean() * (1000 / 3600)
+                            # else:
+                            #     select_data = select_data.groupby(["Date"]).mean()
+
+            else:
+                data = data_dict
                 if all_data.empty:
                     for col in data.columns:
                         if col in variables_dict:
                             all_data[variables_dict[col]] = data[col]
                             if col == "Vitesse du vent, m/s":
                                 wind_ajustment = False
-                    if len(all_data.columns) > 1:
+                    if len(all_data.columns)> 1:
                         all_data["Date"] = pd.to_datetime(all_data['Date'].astype(str), format='%Y-%m-%d')
                         organized_data = pd.DataFrame()
                         for column in all_data.columns:
                             if column == "Precipitation":
                                 subselect_data = all_data.groupby(["Date"]).sum()
                                 subselect_data.reset_index(inplace=True)
-                                subselect_data = subselect_data[["Date",column]]
+                                subselect_data = subselect_data[["Date", column]]
                                 organized_data = pd.concat([organized_data, subselect_data], sort=False, ignore_index=True)
                             elif column == "Global radiation":
                                 subselect_data = all_data.groupby(["Date"]).mean() * (86000 / 1000000)
@@ -388,17 +490,14 @@ def extract_climate(climat_directory: str = raw_weather_directory, observation_p
                                 subselect_data.reset_index(inplace=True)
                                 subselect_data = subselect_data[["Date", column]]
                                 organized_data = pd.concat([organized_data, subselect_data], sort=False, ignore_index=True)
-
-
                         all_data = organized_data
-
                         # if "Precipitation" in all_data.columns:
                         #     all_data = all_data.groupby(["Date"]).sum()
                         #     all_data.reset_index(inplace=True)
                         # elif "Global radiation" in all_data.columns:
-                        #     all_data = all_data.groupby(["Date"]).mean() * (86000 / 1000000)
+                        #     all_data = all_data.groupby(["Date"]).mean() * (86000/1000000)
                         # elif "Wind speed" in all_data.columns:
-                        #     all_data = all_data.groupby(["Date"]).mean() * (1000 / 3600)
+                        #     all_data = all_data.groupby(["Date"]).mean() * (1000/3600)
                         # else:
                         #     all_data = all_data.groupby(["Date"]).mean()
                     else:
@@ -412,11 +511,12 @@ def extract_climate(climat_directory: str = raw_weather_directory, observation_p
                                 wind_ajustment = False
                     if len(select_data.columns) > 1:
                         select_data["Date"] = pd.to_datetime(select_data['Date'].astype(str), format='%Y-%m-%d')
+
                         for column in select_data.columns:
                             if column == "Precipitation":
                                 subselect_data = select_data.groupby(["Date"]).sum()
                                 subselect_data.reset_index(inplace=True)
-                                subselect_data = subselect_data[["Date",column]]
+                                subselect_data = subselect_data[["Date", column]]
                                 all_data = pd.concat([all_data, subselect_data], sort=False, ignore_index=True)
                             elif column == "Global radiation":
                                 subselect_data = select_data.groupby(["Date"]).mean() * (86000 / 1000000)
@@ -429,106 +529,24 @@ def extract_climate(climat_directory: str = raw_weather_directory, observation_p
                                 subselect_data = subselect_data[["Date", column]]
                                 all_data = pd.concat([all_data, subselect_data], sort=False, ignore_index=True)
                             elif column != "Date":
-                                subselect_data = select_data[["Date", column]]
-                                subselect_data.loc[:,column] = select_data.loc[:,column].astype(float)
-                                subselect_data = subselect_data.groupby(["Date"]).mean()
+                                subselect_data = select_data.groupby(["Date"]).mean()
                                 subselect_data.reset_index(inplace=True)
-                                # subselect_data = subselect_data[["Date", column]]
+                                subselect_data = subselect_data[["Date", column]]
                                 all_data = pd.concat([all_data, subselect_data], sort=False, ignore_index=True)
 
+                        # if "Precipitation" in select_data.columns:
+                        #     select_data = select_data.groupby(["Date"]).sum()
+                        #     select_data.reset_index(inplace=True)
                         # elif "Global radiation" in select_data.columns:
                         #     select_data = select_data.groupby(["Date"]).mean() * (86000 / 1000000)
                         # elif "Wind speed" in select_data.columns:
                         #     select_data = select_data.groupby(["Date"]).mean() * (1000 / 3600)
                         # else:
                         #     select_data = select_data.groupby(["Date"]).mean()
-
+                        # all_data = pd.concat([all_data, select_data])
         else:
-            data = data_dict
-            if all_data.empty:
-                for col in data.columns:
-                    if col in variables_dict:
-                        all_data[variables_dict[col]] = data[col]
-                        if col == "Vitesse du vent, m/s":
-                            wind_ajustment = False
-                if len(all_data.columns)> 1:
-                    all_data["Date"] = pd.to_datetime(all_data['Date'].astype(str), format='%Y-%m-%d')
-                    organized_data = pd.DataFrame()
-                    for column in all_data.columns:
-                        if column == "Precipitation":
-                            subselect_data = all_data.groupby(["Date"]).sum()
-                            subselect_data.reset_index(inplace=True)
-                            subselect_data = subselect_data[["Date", column]]
-                            organized_data = pd.concat([organized_data, subselect_data], sort=False, ignore_index=True)
-                        elif column == "Global radiation":
-                            subselect_data = all_data.groupby(["Date"]).mean() * (86000 / 1000000)
-                            subselect_data.reset_index(inplace=True)
-                            subselect_data = subselect_data[["Date", column]]
-                            organized_data = pd.concat([organized_data, subselect_data], sort=False, ignore_index=True)
-                        elif column == "Wind speed" and wind_ajustment:
-                            subselect_data = all_data.groupby(["Date"]).mean() * (1000 / 3600)
-                            subselect_data.reset_index(inplace=True)
-                            subselect_data = subselect_data[["Date", column]]
-                            organized_data = pd.concat([organized_data, subselect_data], sort=False, ignore_index=True)
-                        elif column != "Date":
-                            subselect_data = all_data.groupby(["Date"]).mean()
-                            subselect_data.reset_index(inplace=True)
-                            subselect_data = subselect_data[["Date", column]]
-                            organized_data = pd.concat([organized_data, subselect_data], sort=False, ignore_index=True)
-                    all_data = organized_data
-                    # if "Precipitation" in all_data.columns:
-                    #     all_data = all_data.groupby(["Date"]).sum()
-                    #     all_data.reset_index(inplace=True)
-                    # elif "Global radiation" in all_data.columns:
-                    #     all_data = all_data.groupby(["Date"]).mean() * (86000/1000000)
-                    # elif "Wind speed" in all_data.columns:
-                    #     all_data = all_data.groupby(["Date"]).mean() * (1000/3600)
-                    # else:
-                    #     all_data = all_data.groupby(["Date"]).mean()
-                else:
-                    all_data = pd.DataFrame()
-            else:
-                select_data = pd.DataFrame()
-                for col in data.columns:
-                    if col in variables_dict:
-                        select_data[variables_dict[col]] = data[col]
-                        if col == "Vitesse du vent, m/s":
-                            wind_ajustment = False
-                if len(select_data.columns) > 1:
-                    select_data["Date"] = pd.to_datetime(select_data['Date'].astype(str), format='%Y-%m-%d')
-
-                    for column in select_data.columns:
-                        if column == "Precipitation":
-                            subselect_data = select_data.groupby(["Date"]).sum()
-                            subselect_data.reset_index(inplace=True)
-                            subselect_data = subselect_data[["Date", column]]
-                            all_data = pd.concat([all_data, subselect_data], sort=False, ignore_index=True)
-                        elif column == "Global radiation":
-                            subselect_data = select_data.groupby(["Date"]).mean() * (86000 / 1000000)
-                            subselect_data.reset_index(inplace=True)
-                            subselect_data = subselect_data[["Date", column]]
-                            all_data = pd.concat([all_data, subselect_data], sort=False, ignore_index=True)
-                        elif column == "Wind speed" and wind_ajustment:
-                            subselect_data = select_data.groupby(["Date"]).mean() * (1000 / 3600)
-                            subselect_data.reset_index(inplace=True)
-                            subselect_data = subselect_data[["Date", column]]
-                            all_data = pd.concat([all_data, subselect_data], sort=False, ignore_index=True)
-                        elif column != "Date":
-                            subselect_data = select_data.groupby(["Date"]).mean()
-                            subselect_data.reset_index(inplace=True)
-                            subselect_data = subselect_data[["Date", column]]
-                            all_data = pd.concat([all_data, subselect_data], sort=False, ignore_index=True)
-
-                    # if "Precipitation" in select_data.columns:
-                    #     select_data = select_data.groupby(["Date"]).sum()
-                    #     select_data.reset_index(inplace=True)
-                    # elif "Global radiation" in select_data.columns:
-                    #     select_data = select_data.groupby(["Date"]).mean() * (86000 / 1000000)
-                    # elif "Wind speed" in select_data.columns:
-                    #     select_data = select_data.groupby(["Date"]).mean() * (1000 / 3600)
-                    # else:
-                    #     select_data = select_data.groupby(["Date"]).mean()
-                    # all_data = pd.concat([all_data, select_data])
+            print("##### File %s of %s Skipped: %s #####" % (n, len(all_files), file))
+            n += 1
 
     print("Data extraction finished, start creating climate file")
     # all_data = all_data.dropna()
@@ -566,6 +584,6 @@ def extract_climate(climat_directory: str = raw_weather_directory, observation_p
 
 if __name__ == "__main__":
     print("Hello")
-    print(extract_bathymetry(lakes=lakes_dict, rawnamefile="Bromont_Bathymetry.csv"))
+    # print(extract_bathymetry(lakes=lakes_dict, rawnamefile="Bromont_Bathymetry.csv"))
     print(extract_climate())
-    extract_observations(lakes=lakes_dict)
+    #extract_observations(lakes=lakes_dict)

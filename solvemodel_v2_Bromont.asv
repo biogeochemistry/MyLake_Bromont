@@ -32,7 +32,7 @@ warning off MATLAB:fzero:UndeterminedSyntax %suppressing a warning message
 %       In_Z    : Depths read from initial profiles file (m)
 %       In_Az   : Areas read from initial profiles file (m2)
 %       In_Tz   : Initial temperature profile read from initial profiles file (deg C)
-%       In_Cz   : Initial chlorophyll (group 2) profile read from initial profiles file (-)
+%       In_Cz   : Initial Milorophyll (group 2) profile read from initial profiles file (-)
 %       In_POCz   : Initial sedimenting tracer (or suspended inorganic matter) profile read from initial profiles file (kg m-3)
 %       In_TPz  : Initial total P profile read from initial profiles file (incl. DOP & Chla & Cz) (mg m-3)
 %       In_DOPz  : Initial dissolved organic P profile read from initial profiles file (mg m-3)
