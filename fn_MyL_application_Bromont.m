@@ -6,6 +6,17 @@ global sed_par_file lake_par_file Eevapor
 Eevapor=0;
 % disp('init ...');
 
+if is_save_results
+    load('./Postproc_code/Bromont/Bromont_result_run.mat')
+    if enable_sediment == 1
+        initfile = MyLake_Bromont_sediment_save_init_conc(Sediment_results, 2)
+    end
+    initfile = MyLake_Bromont_save_result_for_init_conc(MyLake_results, 2)
+else
+    disp('Skipping saving the results and initial concentrations');
+end
+
+
 calibration_k_values = [(1:length(K_sediments))',cell2mat(K_sediments(:,1)) ]; % writing sediments parameters file
 
 %% generates unique files
@@ -58,16 +69,6 @@ inputfile=name_of_scenario;
 % 
 % f5_name = (strcat('./Postproc_code/Chlzt.csv'));
 % dlmwrite(f5_name,Chlzt(:, 366:end)', 'delimiter', ',', 'precision', '%.3f');
-
-if is_save_results
-    % disp('Saving sediment and water-column profiles for basin 1: Storefjorden');
-    if enable_sediment == 1
-        sediment_save_init_conc(Sediment_results, 1)
-    end
-    MyLake_save_result_for_init_conc(MyLake_results, 1)
-else
-    disp('Skipping saving the results and initial concentrations');
-end
 
 
 %% cleaning
