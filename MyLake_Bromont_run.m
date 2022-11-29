@@ -4,7 +4,7 @@
 % Code checked by TSA, xx.03.2005
 % Last modified by TSA, 15.08.2006 (Az replaced by In_Az 10.03.06; Possibility to have NaN in Global rad. series, 15.08.06)
 
-function []= MyLake_Bromont_run(M_start,M_stop,lake_name,kz_N0,c_shelter, i_scv, i_sct, swa_b0, swa_b1, I_scDOC,k_Chl,k_POP,k_POC,k_DOP,k_DOC,k_pdesorb_a,k_pdesorb_b, enable_sediment,enable_river_inflow,save_initial_conditions)
+function []= MyLake_Bromont_run(M_start,M_stop,lake_name,kz_N0,c_shelter, i_scv, i_sct, swa_b0, swa_b1, I_scDOC,I_scO,I_scChl, k_Chl,k_BOD, k_POP,k_POC,k_DOP,k_DOC,k_pdesorb_a,k_pdesorb_b, enable_sediment,enable_river_inflow,save_initial_conditions)
 addpath(genpath("MyLake_v2_Vansjo"));
 % Inputs:
 %       M_start : Model start date [year, month, day]
@@ -65,7 +65,12 @@ sediment_params{52} = 100; % 65.1237e+000   %    accel
 % ============ Water Column parameters ====================================
 lake_params{4} = kz_N0;     %7.0e-05,     % 4     min. stability frequency (s-2)
 if c_shelter == 'NaN'
-    lake_params{5} = nan; %0.5,         % 5     wind shelter parameter (-)
+    lake_params{5} = NaN; %0.5,         % 5     wind shelter parameter (-)
+else
+    lake_params{5} = c_shelter; %0.5,         % 5     wind shelter parameter (-)
+end
+if c_shelter == 'nan'
+    lake_params{5} = NaN; %0.5,         % 5     wind shelter parameter (-)
 else
     lake_params{5} = c_shelter; %0.5,         % 5     wind shelter parameter (-)
 end
@@ -74,9 +79,9 @@ lake_params{17} = i_sct;    %0,           % 17    adjusting delta for inflow tem
 lake_params{39} = swa_b0;   %2.5,         % 39    non-PAR light attenuation coeff. (m-1)
 lake_params{40} = swa_b1;   %1.05,        % 40    PAR light attenuation coeff. (m-1)
 lake_params{23} = I_scDOC;   %1,           % 23    scaling factor for inflow concentration of DOC  (-)
-% lake_params{25} = I_scO;    %1,             % 23    scaling factor for inflow concentration of DOC  (-)
-% lake_params{22} = I_scChl;   %1           % 22    scaling factor for inflow concentration of Chl a (-)
-% lake_params{22} = k_BOD;     %0.1         % 62    NOTE: NOT USED: Organic decomposition rate (1/d)
+lake_params{25} = I_scO;    %1,             % 23    scaling factor for inflow concentration of DOC  (-)
+lake_params{22} = I_scChl;   %1           % 22    scaling factor for inflow concentration of Chl a (-)
+lake_params{22} = k_BOD;     %0.1         % 62    NOTE: NOT USED: Organic decomposition rate (1/d)
 % =============== Sediment Parameters ====================================
 %sediment_params{52} = 65.1237e+000;   %    accel
 %lake_params{24} = 390.1162e-003;   % 24    scaling factor for inflow concentration of POP (-)
