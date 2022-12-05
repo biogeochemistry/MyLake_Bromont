@@ -847,7 +847,7 @@ class Lake:
             # Default value for parameters related to Oxygen
             self.I_scDOC = 1
             self.I_scO = 1
-            self.k_BOD = 0.1
+            self.k_BOD, = 0.1
 
             # Default value for parameter related to Chl_a
             self.I_scChl = 1
@@ -951,10 +951,10 @@ class Lake:
 
         iteration_number = 0
         iteration_continue = True
-        save_initial_conditions = 0 #Default value. Will use the by default concentrations values from mylake_initial_concentrations.txt, may be change after first calibration to use last simulation as initial concentrations.
         while True:
             if iteration_number != 0:
                 while True:
+
                     stop_iteration = input("Continue to test value for manual calibration of %s(y or n)? "%dict_variable[what_variable_is_calibrated])
                     if stop_iteration.upper() not in ('Y', 'N'):
                         print("answer giving is not an option, choose between 'y' and 'n'.\n")
@@ -962,17 +962,6 @@ class Lake:
                     else:
                         if stop_iteration.upper() == 'N':
                             iteration_continue = False
-                        break
-                while True:
-                    stop_iteration = input("Do you want to use the last calibration to set the initial concentrations given to the model. (y or n)? \n"
-                                           "If Yes, once Matlab scripts run, mylake_initial_concentrations_2.txt and sediment_initial_concentrations_2.txt (if sediment module enables) will be generated using the last simulation result (use the .mat file) and will be used as initial concentrations.\n"
-                                           "If No, it will use the mylake_initial_concentrations.txt and sediment_initial_concentrations.txt by default.")
-                    if stop_iteration.upper() not in ('Y', 'N'):
-                        print("answer giving is not an option, choose between 'y' and 'n'.\n")
-                        continue
-                    else:
-                        if stop_iteration.upper() == 'Y':
-                            save_initial_conditions = 1
                         break
 
             if iteration_continue:
@@ -1011,19 +1000,19 @@ class Lake:
                 # Run MyLake
                 if self.c_shelter == str(self.c_shelter):
                     cmd = r'%s -wait -r -nosplash -nodesktop MyLake_Bromont_run(%d,%d,%s,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,' \
-                          r'%f,%f,%f,%f,%f,%f,%d,%d,%d);quit' % ( '"%s"' % matlab, 2018, 2021, "'%s'" % self.name,
+                          r'%f,%f,%f,%f,%f,%f,%d,%d);quit' % ( '"%s"' % matlab, 2018, 2021, "'%s'" % self.name,
                                                             self.kz_N0, "'%s'" % self.c_shelter, self.i_scv,
                                                             self.i_sct, self.swa_b0, self.swa_b1, self.I_scDOC,self.I_scO,
                                                             self.I_scChl, self.k_Chl,self.k_BOD, self.k_POP, self.k_POC, self.k_DOP,
                                                             self.k_DOC, self.k_pdesorb_a, self.k_pdesorb_b,
-                                                            enable_sediment,enable_river_inflow,save_initial_conditions)
+                                                            enable_sediment,enable_river_inflow)
                 else:
                     cmd = r'%s -wait -r -nosplash -nodesktop MyLake_Bromont_run(%d,%d,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,' \
-                          r'%f,%f,%f,%f,%f,%f,%d,%d,%d);quit' % ('"%s"' % matlab, 2018, 2021, "'%s'" % self.name,
+                          r'%f,%f,%f,%f,%f,%f,%d,%d);quit' % ('"%s"' % matlab, 2018, 2021, "'%s'" % self.name,
                                                            self.kz_N0, self.c_shelter, self.i_scv, self.i_sct,
                                                            self.swa_b0, self.swa_b1, self.I_scDOC,self.I_scO,self.I_scChl, self.k_Chl,
                                                            self.k_BOD,self.k_POP, self.k_POC, self.k_DOP, self.k_DOC,
-                                                           self.k_pdesorb_a, self.k_pdesorb_b, enable_sediment,enable_river_inflow,save_initial_conditions)
+                                                           self.k_pdesorb_a, self.k_pdesorb_b, enable_sediment,enable_river_inflow)
                 print("Run MyLake model with parameter\n" + cmd)
                 self.save_parameter_value()
                 try:

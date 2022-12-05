@@ -4,7 +4,7 @@
 % Code checked by TSA, xx.03.2005
 % Last modified by TSA, 15.08.2006 (Az replaced by In_Az 10.03.06; Possibility to have NaN in Global rad. series, 15.08.06)
 
-function []= MyLake_Bromont_run(M_start,M_stop,lake_name,kz_N0,c_shelter, i_scv, i_sct, swa_b0, swa_b1, I_scDOC,k_Chl,k_POP,k_POC,k_DOP,k_DOC,k_pdesorb_a,k_pdesorb_b, enable_sediment,enable_river_inflow,save_initial_conditions)
+function []= MyLake_Bromont_run(M_start,M_stop,lake_name,kz_N0,c_shelter, i_scv, i_sct, swa_b0, swa_b1, I_scDOC,k_Chl,k_POP,k_POC,k_DOP,k_DOC,k_pdesorb_a,k_pdesorb_b, enable_sediment,enable_river_inflow)
 addpath(genpath("MyLake_v2_Vansjo"));
 % Inputs:
 %       M_start : Model start date [year, month, day]
@@ -20,11 +20,7 @@ disp(datetime('now'));
 m_start=[M_start, 1, 1]; %
 m_stop=[M_stop, 12, 31];
 
-if save_initial_conditions == 0
 save_initial_conditions = false; % save final concentrations as initial for the next run
-else
-save_initial_conditions = true
-end
 
 name_of_scenario = sprintf('./IO/%s/input_%s.txt',lake_name,lake_name);
 %name_of_init_file = sprintf('Inputs/%s/mylake_initial_concentrations.txt',lake_name);
