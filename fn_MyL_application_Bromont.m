@@ -9,11 +9,9 @@ Eevapor=0;
 if is_save_results
     load('./Postproc_code/Bromont/Bromont_result_run.mat')
     if enable_sediment == 1
-        if isempty( Sediment_results ) == 0
-            initfile = MyLake_Bromont_sediment_save_init_conc(Sediment_results, 2);
-        end
+        initfile = MyLake_Bromont_sediment_save_init_conc(Sediment_results, 2)
     end
-    initfile = MyLake_Bromont_save_result_for_init_conc(MyLake_results, 2);
+    initfile = MyLake_Bromont_save_result_for_init_conc(MyLake_results, 2)
 else
     disp('Skipping saving the results and initial concentrations');
 end
