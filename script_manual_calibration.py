@@ -42,13 +42,18 @@ from sklearn.metrics import r2_score, mean_squared_error
 import statistics
 import csv
 import os
+import pkg_resources
 import shutil
 from datetime import datetime, timedelta, date
 import pandas as pd
 import seaborn as sns
+if not pkg_resources.get_distribution("seaborn").version == '0.11.0':
+    os.system('conda install seaborn=0.11.0')
+    import seaborn as sns
 from numpy import arange, nan, reshape, sqrt
 import scipy.io as sio
-
+import subprocess
+cwd = os.getcwd()
 
 
 # variable_pos = {'T': 5, 'O2': 6, 'Chl': 13}
@@ -255,6 +260,12 @@ def ask_for_matlab_directory():
     elif os.path.exists(r"C:\Program Files\MATLAB\R2019a\bin"):
         print(r"matlab.exe used: C:\Program Files\MATLAB\R2019a\bin\matlab")
         return r"C:\Program Files\MATLAB\R2019a\bin\matlab"
+    elif os.path.exists(r"C:\Program Files\MATLAB\R2020b\bin"):
+        print(r"matlab.exe used: C:\Program Files\MATLAB\R2020b\bin\matlab")
+        return r"C:\Program Files\MATLAB\R2020b\bin\matlab"
+    elif os.path.exists(r"C:\Program Files\MATLAB\R2022b\bin"):
+        print(r"matlab.exe used: C:\Program Files\MATLAB\R2022b\bin\matlab")
+        return r"C:\Program Files\MATLAB\R2022b\bin\matlab"
     else:
         while True:
             directory = input(r"Enter path to matlab.exe (ex: C:\Program Files\MATLAB\R2019b\bin\matlab) : ")
@@ -750,8 +761,8 @@ def linear_regression_plot(x2, y2, ax=None, linearregressionarg={}, confidentint
     # ax.fill_between(x_pred, lower, upper, **confidentintervalarg)
     # ax.plot(x_pred, lower, **confidentintervalarg, alpha=1, linestyle='-')
     # ax.plot(x_pred, upper, **confidentintervalarg, alpha=1, linestyle='-')
-    sns.regplot(x2, y2, ci=95, scatter_kws={"color": "white", "alpha": 1, "zorder": -10}, line_kws=confidentintervalarg,
-                ax=ax)
+    sns.regplot(x2, y2,ax=ax)# ci=95, scatter_kws={"color": "white", "alpha": 1, "zorder": -10}, line_kws=confidentintervalarg,
+                #ax=ax)
 
 
 def error_bar_plot(x, y, xerr, yerr, ax=None, errorbararg={}, markerwidth=4):
@@ -847,7 +858,7 @@ class Lake:
             # Default value for parameters related to Oxygen
             self.I_scDOC = 1
             self.I_scO = 1
-            self.k_BOD, = 0.1
+            self.k_BOD = 0.1
 
             # Default value for parameter related to Chl_a
             self.I_scChl = 1
@@ -951,6 +962,7 @@ class Lake:
 
         iteration_number = 0
         iteration_continue = True
+        save_initial_conditions = 0  # Default value. Will use the by default concentrations values from mylake_initial_concentrations.txt, may be change after first calibration to use last simulation as initial concentrations.
         while True:
             if iteration_number != 0:
                 while True:
@@ -962,6 +974,17 @@ class Lake:
                     else:
                         if stop_iteration.upper() == 'N':
                             iteration_continue = False
+                        break
+                while True:
+                    stop_iteration = input("Do you want to use the last calibration to set the initial concentrations given to the model. (y or n)? \n"
+                                           "If Yes, once Matlab scripts run, mylake_initial_concentrations_2.txt and sediment_initial_concentrations_2.txt (if sediment module enables) will be generated using the last simulation result (use the .mat file) and will be used as initial concentrations.\n"
+                                           "If No, it will use the mylake_initial_concentrations.txt and sediment_initial_concentrations.txt by default.")
+                    if stop_iteration.upper() not in ('Y', 'N'):
+                        print("answer giving is not an option, choose between 'y' and 'n'.\n")
+                        continue
+                    else:
+                        if stop_iteration.upper() == 'Y':
+                            save_initial_conditions = 1
                         break
 
             if iteration_continue:
@@ -999,6 +1022,17 @@ class Lake:
                     enable_river_inflow = 1
                 # Run MyLake
                 if self.c_shelter == str(self.c_shelter):
+                    myBat = open(r'%s/commandline_run_matlab.bat' % cwd, 'w+')
+                    myBat.write('''@echo off
+                                    cd %s
+                                    %s -nosplash -nodesktop -r "MyLake_Bromont_run(%d,%d,%s,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d), exit"
+                                                        ''' % (cwd,'"%s"' % matlab, 2018, 2021, "'%s'" % self.name,
+                                                            self.kz_N0, "'%s'" % self.c_shelter, self.i_scv,
+                                                            self.i_sct, self.swa_b0, self.swa_b1, self.I_scDOC,self.I_scO,
+                                                            self.I_scChl, self.k_Chl,self.k_BOD, self.k_POP, self.k_POC, self.k_DOP,
+                                                            self.k_DOC, self.k_pdesorb_a, self.k_pdesorb_b,
+                                                            enable_sediment,enable_river_inflow, save_initial_conditions))
+                    myBat.close()
                     cmd = r'%s -wait -r -nosplash -nodesktop MyLake_Bromont_run(%d,%d,%s,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,' \
                           r'%f,%f,%f,%f,%f,%f,%d,%d);quit' % ( '"%s"' % matlab, 2018, 2021, "'%s'" % self.name,
                                                             self.kz_N0, "'%s'" % self.c_shelter, self.i_scv,
@@ -1007,6 +1041,20 @@ class Lake:
                                                             self.k_DOC, self.k_pdesorb_a, self.k_pdesorb_b,
                                                             enable_sediment,enable_river_inflow)
                 else:
+                    myBat = open(r'%s/commandline_run_matlab.bat' % cwd, 'w+')
+                    myBat.write('''@echo off
+                                                        cd %s
+                                                        %s -nosplash -nodesktop -r "MyLake_Bromont_run(%d,%d,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d), exit"
+                                                        ''' % (cwd,
+                                                               '"%s"' % matlab, 2018, 2022, "'%s'" % self.name,
+                                                               self.kz_N0, self.c_shelter, self.i_scv, self.i_sct,
+                                                               self.swa_b0, self.swa_b1, self.I_scDOC, self.I_scO,
+                                                               self.I_scChl, self.k_Chl,
+                                                               self.k_BOD, self.k_POP, self.k_POC, self.k_DOP,
+                                                               self.k_DOC,
+                                                               self.k_pdesorb_a, self.k_pdesorb_b, enable_sediment,
+                                                               enable_river_inflow, save_initial_conditions))
+                    myBat.close()
                     cmd = r'%s -wait -r -nosplash -nodesktop MyLake_Bromont_run(%d,%d,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,' \
                           r'%f,%f,%f,%f,%f,%f,%d,%d);quit' % ('"%s"' % matlab, 2018, 2021, "'%s'" % self.name,
                                                            self.kz_N0, self.c_shelter, self.i_scv, self.i_sct,
@@ -1016,7 +1064,9 @@ class Lake:
                 print("Run MyLake model with parameter\n" + cmd)
                 self.save_parameter_value()
                 try:
-                    os.system(cmd)
+                    # os.system(cmd)
+                    p = subprocess.run([r'%s/commandline_run_matlab.bat' % cwd])
+                    input("Press Enter once the Matlab window closes...")
                     print("run MyLake sucess")
                 except:
                     print('error with matlab')

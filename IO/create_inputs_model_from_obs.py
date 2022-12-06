@@ -311,7 +311,7 @@ class Simulation_informations:
             print(column)
             estimatedvalues = meteoaverage.dropna(axis=0,subset=[column])
             for day in estimatedvalues["month_day"]:
-                print(day)
+                #print(day)
                 meteo.loc[(meteo[column].isnull())& (meteo["month_day"] == day),column] =  float(estimatedvalues.loc[estimatedvalues["month_day"] == day,column])
 
 

@@ -1,10 +1,21 @@
-function [MyLake_results, Sediment_results] = fn_MyL_application_Bromont(m_start,m_stop, K_sediments, K_lake, name_of_scenario, is_save_results,~,initfile, param_file,  enable_sediment,enable_river_inflow)
+function [MyLake_results, Sediment_results] = fn_MyL_application_Bromont(m_start,m_stop, K_sediments, K_lake, name_of_scenario, is_save_results,~,initfile, param_file,sediment_file,  enable_sediment,enable_river_inflow)
 global sed_par_file lake_par_file Eevapor
 % This is the main MyLake application configuration file. INCA is a switch
 % It is made to run a after the parameter are set by Set_Prior
 
 Eevapor=0;
 % disp('init ...');
+if is_save_results
+    load('./Postproc_code/Bromont/Bromont_result_run.mat')
+    if enable_sediment == 1
+        if isempty( Sediment_results ) == 0
+            initfile = MyLake_Bromont_sediment_save_init_conc(Sediment_results, 2);
+        end
+    end
+    initfile = MyLake_Bromont_save_result_for_init_conc(MyLake_results, 2);
+else
+    disp('Skipping saving the results and initial concentrations');
+end
 
 calibration_k_values = [(1:length(K_sediments))',cell2mat(K_sediments(:,1)) ]; % writing sediments parameters file
 
@@ -14,6 +25,7 @@ sed_par_file = tempname;
 lake_par_file = tempname;
 
 dlmwrite(sed_par_file, calibration_k_values,'delimiter','\t');
+dlmwrite(sediment_file, calibration_k_values,'delimiter','\t');
 
 %% writing lake parameter file
 f = fopen(param_file);

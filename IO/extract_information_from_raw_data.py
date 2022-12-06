@@ -584,6 +584,6 @@ def extract_climate(climat_directory: str = raw_weather_directory, observation_p
 
 if __name__ == "__main__":
     print("Hello")
-    # print(extract_bathymetry(lakes=lakes_dict, rawnamefile="Bromont_Bathymetry.csv"))
+    print(extract_bathymetry(lakes=lakes_dict, rawnamefile="Bromont_Bathymetry.csv"))
     print(extract_climate())
-    #extract_observations(lakes=lakes_dict)
+    extract_observations(lakes=lakes_dict)
