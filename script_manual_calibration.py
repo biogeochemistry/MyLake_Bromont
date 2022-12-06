@@ -1034,19 +1034,19 @@ class Lake:
                                                             enable_sediment,enable_river_inflow, save_initial_conditions))
                     myBat.close()
                     cmd = r'%s -wait -r -nosplash -nodesktop MyLake_Bromont_run(%d,%d,%s,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,' \
-                          r'%f,%f,%f,%f,%f,%f,%d,%d);quit' % ( '"%s"' % matlab, 2018, 2021, "'%s'" % self.name,
+                          r'%f,%f,%f,%f,%f,%f,%d,%d,%d);quit' % ( '"%s"' % matlab, 2018, 2021, "'%s'" % self.name,
                                                             self.kz_N0, "'%s'" % self.c_shelter, self.i_scv,
                                                             self.i_sct, self.swa_b0, self.swa_b1, self.I_scDOC,self.I_scO,
                                                             self.I_scChl, self.k_Chl,self.k_BOD, self.k_POP, self.k_POC, self.k_DOP,
                                                             self.k_DOC, self.k_pdesorb_a, self.k_pdesorb_b,
-                                                            enable_sediment,enable_river_inflow)
+                                                            enable_sediment,enable_river_inflow,save_initial_conditions)
                 else:
                     myBat = open(r'%s/commandline_run_matlab.bat' % cwd, 'w+')
                     myBat.write('''@echo off
                                                         cd %s
                                                         %s -nosplash -nodesktop -r "MyLake_Bromont_run(%d,%d,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d), exit"
                                                         ''' % (cwd,
-                                                               '"%s"' % matlab, 2018, 2022, "'%s'" % self.name,
+                                                               '"%s"' % matlab, 2018, 2021, "'%s'" % self.name,
                                                                self.kz_N0, self.c_shelter, self.i_scv, self.i_sct,
                                                                self.swa_b0, self.swa_b1, self.I_scDOC, self.I_scO,
                                                                self.I_scChl, self.k_Chl,
@@ -1056,11 +1056,11 @@ class Lake:
                                                                enable_river_inflow, save_initial_conditions))
                     myBat.close()
                     cmd = r'%s -wait -r -nosplash -nodesktop MyLake_Bromont_run(%d,%d,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,' \
-                          r'%f,%f,%f,%f,%f,%f,%d,%d);quit' % ('"%s"' % matlab, 2018, 2021, "'%s'" % self.name,
+                          r'%f,%f,%f,%f,%f,%f,%d,%d,%d);quit' % ('"%s"' % matlab, 2018, 2021, "'%s'" % self.name,
                                                            self.kz_N0, self.c_shelter, self.i_scv, self.i_sct,
                                                            self.swa_b0, self.swa_b1, self.I_scDOC,self.I_scO,self.I_scChl, self.k_Chl,
                                                            self.k_BOD,self.k_POP, self.k_POC, self.k_DOP, self.k_DOC,
-                                                           self.k_pdesorb_a, self.k_pdesorb_b, enable_sediment,enable_river_inflow)
+                                                           self.k_pdesorb_a, self.k_pdesorb_b, enable_sediment,enable_river_inflow,save_initial_conditions)
                 print("Run MyLake model with parameter\n" + cmd)
                 self.save_parameter_value()
                 try:
@@ -2381,7 +2381,8 @@ class Lake:
                         date_sim = sims_dates[y]
 
                     except:
-                        print("2")
+                        nothing = True
+                        #print("2")
                     simulation_dict[date_sim] = temp_at_date
 
                 # with open("{}/{}zt.csv".format(self.output_folder, variable), "r") as simulation_file:
